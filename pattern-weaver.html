@@ -1,0 +1,816 @@
+<title>Pattern Weaver — A Pattern Language</title>
+<style>
+  /* ============ TOKENS ============ */
+  :root{
+    /* warm manila drafting paper, sepia ink */
+    --paper:#E4DBC6;
+    --panel:#EDE6D5;
+    --panel-2:#E7DFCC;
+    --ink:#2C2620;
+    --ink-soft:#6C6353;
+    --ink-faint:#938872;
+    --line:rgba(44,38,32,.15);
+    --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346;        /* living / coherent */
+    --life-bright:#7B9A4E;
+    --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C;        /* gap / locked */
+    --gold:#A9812B;        /* stars */
+    --shadow:rgba(52,44,32,.16);
+    /* scale-band gradient: forest landscape -> hearth clay */
+    --b0:#4E6B4A; --b1:#5E7146; --b2:#6E7A3C; --b3:#8A7730;
+    --b4:#9A6A2E; --b5:#A05E2E; --b6:#A6552E;
+    --radius:10px;
+    --serif:"Hoefler Text","Iowan Old Style",Palatino,"Palatino Linotype",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#191712; --panel:#221E18; --panel-2:#26221A;
+      --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+      --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+      --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+      --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.4);
+      --b0:#6E9064; --b1:#7C9760; --b2:#93A055; --b3:#B49B4C;
+      --b4:#C2894A; --b5:#C97C4B; --b6:#CE734C;
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#E4DBC6; --panel:#EDE6D5; --panel-2:#E7DFCC;
+    --ink:#2C2620; --ink-soft:#6C6353; --ink-faint:#938872;
+    --line:rgba(44,38,32,.15); --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346; --life-bright:#7B9A4E; --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C; --gold:#A9812B; --shadow:rgba(52,44,32,.16);
+    --b0:#4E6B4A; --b1:#5E7146; --b2:#6E7A3C; --b3:#8A7730;
+    --b4:#9A6A2E; --b5:#A05E2E; --b6:#A6552E;
+  }
+  :root[data-theme="dark"]{
+    --paper:#191712; --panel:#221E18; --panel-2:#26221A;
+    --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+    --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+    --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+    --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.4);
+    --b0:#6E9064; --b1:#7C9760; --b2:#93A055; --b3:#B49B4C;
+    --b4:#C2894A; --b5:#C97C4B; --b6:#CE734C;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:var(--serif);
+    font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      radial-gradient(circle at 18% 12%,rgba(255,255,255,.05),transparent 45%),
+      radial-gradient(circle at 82% 88%,rgba(0,0,0,.04),transparent 55%);
+  }
+  .mono{font-family:var(--mono)}
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--life-bright);outline-offset:2px;border-radius:4px}
+
+  /* ============ APP SHELL ============ */
+  .app{
+    max-width:1360px;margin:0 auto;min-height:100vh;
+    display:flex;flex-direction:column;
+    padding:clamp(12px,2.4vw,28px);gap:16px;
+  }
+
+  /* ---- Header ---- */
+  header.top{
+    display:grid;grid-template-columns:1fr auto;align-items:end;gap:16px;
+    border-bottom:1.5px solid var(--line-strong);padding-bottom:14px;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--ink-faint);margin:0 0 6px;
+  }
+  h1.title{
+    font-family:var(--serif);font-weight:600;
+    font-size:clamp(1.9rem,4.4vw,3rem);line-height:.98;margin:0;letter-spacing:-.02em;
+    text-wrap:balance;
+  }
+  h1.title em{font-style:italic;color:var(--life)}
+  .subtitle{color:var(--ink-soft);font-size:.95rem;margin:.5rem 0 0;max-width:52ch;font-style:italic}
+  .head-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .btn{
+    font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    background:transparent;border:1px solid var(--line-strong);color:var(--ink-soft);
+    padding:8px 12px;border-radius:99px;transition:.18s;
+  }
+  .btn:hover{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+
+  /* ---- Meters row ---- */
+  .commission{
+    display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:12px 18px;box-shadow:0 1px 0 var(--shadow);
+  }
+  .commission .goal{flex:1 1 260px;min-width:220px}
+  .commission .goal b{font-weight:600}
+  .commission .goal .glabel{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);display:block;margin-bottom:2px}
+  .meters{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .meter{min-width:132px}
+  .meter .mlabel{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);display:flex;justify-content:space-between;gap:10px;margin-bottom:5px}
+  .meter .mval{color:var(--ink);font-variant-numeric:tabular-nums}
+  .lifebar{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+  .lifebar>span{display:block;height:100%;width:0;border-radius:99px;
+    background:linear-gradient(90deg,var(--life),var(--life-bright));
+    box-shadow:0 0 10px var(--life-glow);transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .banddots{display:flex;gap:5px}
+  .banddots i{width:12px;height:12px;border-radius:3px;background:var(--line);border:1px solid var(--line-strong);transition:.3s}
+  .banddots i.lit{background:var(--bh);border-color:transparent;box-shadow:0 0 7px var(--bh)}
+
+  /* ============ WORKSPACE ============ */
+  .work{
+    display:grid;gap:16px;flex:1;min-height:0;
+    grid-template-columns:170px minmax(0,1fr) 360px;
+    align-items:stretch;
+  }
+  .card{
+    background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    box-shadow:0 1px 0 var(--shadow);
+  }
+  .card-h{
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--ink-faint);padding:13px 16px 10px;border-bottom:1px solid var(--line);
+    display:flex;justify-content:space-between;align-items:center;gap:8px;
+  }
+
+  /* ---- Scale Ladder ---- */
+  .ladder{display:flex;flex-direction:column;overflow:hidden}
+  .ladder .rungs{display:flex;flex-direction:column;padding:8px;gap:6px;flex:1}
+  .rung{
+    position:relative;border:1px solid var(--line);border-left:4px solid var(--bh);
+    border-radius:7px;padding:8px 10px;background:var(--panel-2);
+    flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;
+    transition:.3s;overflow:hidden;
+  }
+  .rung.active{background:color-mix(in srgb,var(--bh) 12%,var(--panel-2));box-shadow:inset 0 0 0 1px var(--bh)}
+  .rung .rn{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--bh);text-transform:uppercase}
+  .rung .rname{font-size:.92rem;font-weight:600;line-height:1.12;margin-top:1px}
+  .rung .rcount{font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-top:auto;padding-top:4px}
+  .rung .rcount b{color:var(--bh)}
+
+  /* ---- The Draft (hero) ---- */
+  .draft{position:relative;overflow:hidden;display:flex;flex-direction:column}
+  .draft .card-h .live{color:var(--life);opacity:0;transition:.4s;font-weight:600}
+  .draft.alive .card-h .live{opacity:1}
+  .draftscroll{flex:1;overflow:auto;position:relative;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:26px 26px;background-position:-1px -1px}
+  .stage{position:relative}
+  .rowsep{position:absolute;left:0;right:0;height:0;border-top:1px dashed var(--line);pointer-events:none}
+  .rowlabel{position:absolute;right:12px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--bh);opacity:.5;pointer-events:none;transform:translateY(-50%)}
+  svg.threads{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+  .thread{fill:none;stroke:var(--life);stroke-linecap:round;
+    stroke-dasharray:var(--len);stroke-dashoffset:var(--len);
+    animation:grow .7s cubic-bezier(.22,1,.36,1) forwards}
+  @keyframes grow{to{stroke-dashoffset:0}}
+  .nodes{position:absolute;inset:0}
+  .node{
+    position:absolute;transform:translate(-50%,-50%);
+    width:132px;text-align:left;background:var(--panel);
+    border:1px solid var(--line-strong);border-left:4px solid var(--nh);
+    border-radius:8px;padding:7px 9px 8px;box-shadow:0 2px 6px var(--shadow);
+    transition:transform .15s,box-shadow .15s,border-color .15s;
+    animation:pop .45s cubic-bezier(.22,1.4,.4,1) backwards;
+  }
+  @keyframes pop{from{opacity:0;transform:translate(-50%,-50%) scale(.6)}}
+  .node:hover{transform:translate(-50%,-50%) scale(1.05);box-shadow:0 5px 16px var(--shadow);z-index:5}
+  .node.sel{border-color:var(--life);box-shadow:0 0 0 2px var(--life),0 5px 16px var(--shadow);z-index:6}
+  .node .nid{font-family:var(--mono);font-size:10px;color:var(--nh);letter-spacing:.04em;display:flex;justify-content:space-between}
+  .node .nstars{color:var(--gold);letter-spacing:-1px}
+  .node .nname{font-size:.82rem;font-weight:600;line-height:1.08;margin-top:2px}
+  .node.seed{border-left-width:4px;box-shadow:0 0 0 1px var(--life-glow),0 4px 14px var(--shadow)}
+  .draft .empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-faint);
+    font-style:italic;padding:24px;text-align:center}
+
+  /* ---- Weaving Table (right) ---- */
+  .table{display:flex;flex-direction:column;overflow:hidden}
+  .reader{padding:16px 18px;overflow:auto;flex:1;min-height:0}
+  .reader.intro .rd-open{display:block}
+  .rd-open{color:var(--ink-soft)}
+  .rd-open p{margin:.2rem 0 1rem}
+  .rd-open ol{margin:0;padding-left:1.1rem}
+  .rd-open li{margin-bottom:.7rem}
+  .rd-open li b{color:var(--ink);font-weight:600}
+  .rd-band{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--nh);display:inline-flex;align-items:center;gap:7px}
+  .rd-band::before{content:"";width:9px;height:9px;border-radius:2px;background:var(--nh)}
+  .rd-title{font-size:1.5rem;font-weight:600;line-height:1.05;margin:.35rem 0 .1rem;text-wrap:balance;letter-spacing:-.01em}
+  .rd-num{font-family:var(--mono);color:var(--ink-faint);font-size:.95rem}
+  .rd-stars{color:var(--gold);font-size:1.05rem;letter-spacing:1px;margin:.2rem 0 .1rem}
+  .rd-conf{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .rd-sect{margin-top:1rem}
+  .rd-sect .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:2px}
+  .rd-sect .txt{line-height:1.5}
+  .rd-sect.sol .txt::before{content:"Therefore — ";font-style:italic;color:var(--life);font-weight:600}
+  .rd-links{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .chip{font-family:var(--mono);font-size:11px;padding:3px 9px;border-radius:99px;
+    border:1px solid var(--line-strong);background:var(--panel-2);color:var(--ink-soft);transition:.15s}
+  .chip:hover{border-color:var(--life);color:var(--life)}
+  .chip.on{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+  .chip.need{border-color:var(--clay);color:var(--clay)}
+  .status{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:99px;margin-top:2px}
+  .status.on{background:var(--life-glow);color:var(--life)}
+  .status.ready{background:color-mix(in srgb,var(--gold) 20%,transparent);color:var(--gold)}
+  .status.locked{background:color-mix(in srgb,var(--clay) 16%,transparent);color:var(--clay)}
+  .weave-btn{
+    display:block;width:100%;margin-top:16px;padding:13px;border-radius:8px;border:none;
+    background:var(--life);color:#fff;font-family:var(--mono);font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;font-weight:600;transition:.18s;box-shadow:0 3px 12px var(--life-glow)}
+  :root[data-theme="dark"] .weave-btn,:root:not([data-theme="light"]) .weave-btn{color:#15140f}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .weave-btn{color:#15140f}}
+  .weave-btn:hover{background:var(--life-bright);transform:translateY(-1px)}
+  .weave-btn:disabled{background:var(--line);color:var(--ink-faint);box-shadow:none;cursor:default;transform:none}
+  .weave-note{font-size:.82rem;color:var(--ink-soft);font-style:italic;margin-top:9px;line-height:1.4}
+
+  /* ---- Deck ---- */
+  .deck{border-top:1.5px solid var(--line-strong);display:flex;flex-direction:column;max-height:44%}
+  .deck .card-h .cnt{color:var(--life);font-weight:600}
+  .decklist{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:6px}
+  .dcard{
+    display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:9px;
+    text-align:left;width:100%;background:var(--panel-2);border:1px solid var(--line);
+    border-left:3px solid var(--nh);border-radius:7px;padding:7px 10px;transition:.15s}
+  .dcard:hover{border-color:var(--life);background:var(--life-glow);transform:translateX(2px)}
+  .dcard.sel{border-color:var(--life);box-shadow:inset 0 0 0 1px var(--life)}
+  .dcard .dn{font-family:var(--mono);font-size:11px;color:var(--nh)}
+  .dcard .dname{font-size:.85rem;font-weight:600;line-height:1.05}
+  .dcard .dstars{font-family:var(--mono);color:var(--gold);font-size:.8rem;letter-spacing:-1px}
+  .deck .none{padding:18px;color:var(--ink-faint);font-style:italic;text-align:center;font-size:.88rem}
+
+  /* ---- Toast ---- */
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:var(--paper);padding:12px 20px;border-radius:99px;
+    font-size:.9rem;box-shadow:0 8px 30px var(--shadow);opacity:0;pointer-events:none;
+    transition:.35s cubic-bezier(.22,1,.36,1);z-index:60;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--life-bright)}
+
+  /* ---- Overlay (intro / win) ---- */
+  .overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 55%,transparent);
+    display:grid;place-items:center;padding:20px;z-index:80;opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(3px)}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .modal{background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;
+    max-width:560px;width:100%;padding:clamp(22px,4vw,38px);box-shadow:0 24px 70px var(--shadow);
+    transform:translateY(12px) scale(.98);transition:.35s cubic-bezier(.22,1,.36,1)}
+  .overlay.show .modal{transform:none}
+  .modal .eyebrow{color:var(--life)}
+  .modal h2{font-size:clamp(1.6rem,4vw,2.2rem);margin:.1rem 0 .5rem;font-weight:600;line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+  .modal p{color:var(--ink-soft);margin:.4rem 0}
+  .modal ol{color:var(--ink-soft);padding-left:1.15rem;margin:1rem 0}
+  .modal ol li{margin-bottom:.7rem}
+  .modal ol li b{color:var(--ink);font-weight:600}
+  .modal .start{margin-top:14px;width:100%;padding:14px;border:none;border-radius:9px;background:var(--life);color:#fff;
+    font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;transition:.18s}
+  .modal .start:hover{background:var(--life-bright)}
+  .modal.win .bloom{font-size:2.4rem;text-align:center;color:var(--life);margin-bottom:.3rem}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:1080px){
+    .work{grid-template-columns:130px minmax(0,1fr) 320px}
+    .node{width:118px}
+  }
+  @media (max-width:860px){
+    .work{grid-template-columns:1fr;grid-auto-rows:auto}
+    .ladder{order:1}.ladder .rungs{flex-direction:row;overflow-x:auto}
+    .rung{flex:0 0 128px;min-height:74px}
+    .draft{order:2;height:min(58vh,520px)}
+    .table{order:3}
+    .deck{max-height:none}
+    .head-tools{justify-content:flex-start}
+    header.top{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001ms!important;transition-duration:.001ms!important}
+    .thread{stroke-dashoffset:0!important}
+  }
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">A Pattern Language · Towns 1–94 · after Christopher Alexander</p>
+      <h1 class="title">Pattern <em>Weaver</em></h1>
+      <p class="subtitle">A town is not designed all at once. Begin at the region and weave downward — each pattern held by a larger one — until the place comes alive.</p>
+    </div>
+    <div class="head-tools">
+      <button class="btn" id="howBtn">How to play</button>
+      <button class="btn" id="themeBtn">Theme</button>
+      <button class="btn" id="resetBtn">Reset</button>
+    </div>
+  </header>
+
+  <div class="commission">
+    <div class="goal">
+      <span class="glabel">The Commission</span>
+      <b>Bring a town to life.</b> Weave patterns down through all seven scales. Life grows with every coherent link.
+    </div>
+    <div class="meters">
+      <div class="meter">
+        <div class="mlabel"><span>Life</span><span class="mval" id="lifePct">0%</span></div>
+        <div class="lifebar"><span id="lifeFill"></span></div>
+      </div>
+      <div class="meter">
+        <div class="mlabel"><span>Scales lit</span><span class="mval"><span id="bandsN">0</span>/7</span></div>
+        <div class="banddots" id="banddots"></div>
+      </div>
+      <div class="meter" style="min-width:auto">
+        <div class="mlabel"><span>Woven</span><span class="mval"><span id="wovenN">0</span></span></div>
+        <div class="mval mono" style="font-size:1.2rem;line-height:1" id="wovenBig">1</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="work">
+    <!-- Scale ladder -->
+    <aside class="card ladder">
+      <div class="card-h">Scale</div>
+      <div class="rungs" id="rungs"></div>
+    </aside>
+
+    <!-- The Draft -->
+    <section class="card draft" id="draft">
+      <div class="card-h"><span>The Draft</span><span class="live">◈ alive</span></div>
+      <div class="draftscroll" id="draftscroll">
+        <div class="stage" id="stage">
+          <svg class="threads" id="threads"></svg>
+          <div class="nodes" id="nodes"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Weaving table -->
+    <aside class="card table">
+      <div class="card-h">Pattern Reader</div>
+      <div class="reader intro" id="reader"></div>
+      <div class="deck">
+        <div class="card-h"><span>Ready to weave</span><span class="cnt" id="deckCnt">0</span></div>
+        <div class="decklist" id="decklist"></div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   THE PATTERNS — a curated, faithful subset of the Towns
+   section (1–94) of Christopher Alexander's A Pattern Language.
+   Problem / solution are paraphrased for learning (not quoted).
+   `contains` = the real "smaller patterns" links from the book,
+   which drive the tech-tree of dependencies.
+   stars: Alexander's confidence rating (0–2).
+   band: 0 Region · 1 City&Country · 2 Community · 3 Neighborhood
+         4 Paths&Streets · 5 Common Space · 6 Local Life
+   ============================================================ */
+const BANDS=[
+  {name:"Region",        range:"1–7",   blurb:"Regions & the open country"},
+  {name:"City & Country",range:"8–11",  blurb:"Where the town meets the land"},
+  {name:"Community",     range:"12–27", blurb:"Communities of a few thousand"},
+  {name:"Neighborhood",  range:"28–48", blurb:"Nodes, work & dwelling"},
+  {name:"Paths & Streets",range:"49–57",blurb:"How you move between"},
+  {name:"Common Space",  range:"58–74", blurb:"Squares, greens & gathering"},
+  {name:"Local Life",    range:"75–94", blurb:"Home, shop, cafe, corner"},
+];
+
+const P=[
+ {n:1,name:"Independent Regions",s:2,b:0,c:[3,4,8,11],
+  p:"Vast centralized nations can't answer to the real character of the places inside them.",
+  o:"devolve power to regions of a few million, each with its own natural and cultural identity."},
+ {n:3,name:"City Country Fingers",s:2,b:0,c:[4,7,10],
+  p:"When city and farmland sprawl into one another, both are ruined.",
+  o:"keep them interlocked as fingers — no point in the city more than a mile from open country."},
+ {n:4,name:"Agricultural Valleys",s:1,b:0,c:[7],
+  p:"Good farmland is scarce, slow to form, and easily paved over.",
+  o:"protect the fertile valley floors for farming; build only on the hills and edges."},
+ {n:7,name:"The Countryside",s:2,b:0,c:[67],
+  p:"Countryside held as private turf, or left as dead wilderness, serves no one.",
+  o:"steward all land as commons — farmed, cared for, and open to walk through."},
+ {n:8,name:"Mosaic of Subcultures",s:2,b:1,c:[12,13,10,26],
+  p:"A homogenized city gives no one a way of life that truly fits them.",
+  o:"let many small, distinct subcultures each hold and shape their own patch of the city."},
+ {n:10,name:"Magic of the City",s:1,b:1,c:[30,31,58],
+  p:"Scattered sprawl dilutes the concentrated wonder only a real city can offer.",
+  o:"gather the greatest attractions into a few electric nodes people will travel to reach."},
+ {n:11,name:"Local Transport Areas",s:1,b:1,c:[49,52],
+  p:"Fast through-traffic running everywhere makes every local street unlivable.",
+  o:"divide the city into areas about a mile across where cars must move slow and local."},
+ {n:12,name:"Community of 7000",s:2,b:2,c:[14,44,21,28],
+  p:"In a city of millions no single voice can ever be heard.",
+  o:"organize self-governing communities of roughly 5,000–10,000 people."},
+ {n:13,name:"Subculture Boundary",s:1,b:2,c:[14],
+  p:"Adjacent subcultures bleed together and quietly erase one another.",
+  o:"separate them with boundaries of non-residential land — parks, water, workplaces."},
+ {n:14,name:"Identifiable Neighborhood",s:2,b:2,c:[30,37,61,41],
+  p:"People need a small piece of the city they can name and feel as home.",
+  o:"form neighborhoods of about 500 people, small enough to be known and to know."},
+ {n:21,name:"Four-Story Limit",s:2,b:2,c:[37],
+  p:"High-rise buildings quietly damage the people made to live in them.",
+  o:"keep almost all buildings four stories or fewer; save height for rare landmarks."},
+ {n:26,name:"Life Cycle",s:2,b:2,c:[57],
+  p:"A place with no room for every stage of life stunts the people in it.",
+  o:"weave settings for birth, youth, marriage, work, age and death into the community."},
+ {n:28,name:"Eccentric Nucleus",s:1,b:3,c:[30],
+  p:"A perfectly centered center leaves the edges of a place lifeless.",
+  o:"let the busy heart sit off-center, pulled toward the densest side."},
+ {n:30,name:"Activity Nodes",s:2,b:3,c:[31,61],
+  p:"Community life dies when activity is spread thin and evenly everywhere.",
+  o:"concentrate public life at a few nodes where important paths already cross."},
+ {n:31,name:"Promenade",s:2,b:3,c:[32,58,88,59],
+  p:"People need a place to go simply to see others and be seen among them.",
+  o:"make a pedestrian promenade each subculture can claim as its evening stage."},
+ {n:32,name:"Shopping Street",s:1,b:3,c:[87,89],
+  p:"Malls and strips cut shops off from the ordinary life of the street.",
+  o:"string shops along a real street, open to the sidewalk and the passing crowd."},
+ {n:37,name:"House Cluster",s:2,b:3,c:[51,67,79],
+  p:"Rows of isolated houses give neighbors no ground on which to meet.",
+  o:"group eight to twelve households around common land they tend together."},
+ {n:41,name:"Work Community",s:2,b:3,c:[87],
+  p:"Work sealed away from home and street decays into lifeless drudgery.",
+  o:"cluster workplaces into small communities woven back into everyday life."},
+ {n:44,name:"Local Town Hall",s:1,b:3,c:[61],
+  p:"A distant city hall leaves a community powerless over its own place.",
+  o:"give each community a small, open town hall it can actually walk into and control."},
+ {n:49,name:"Looped Local Roads",s:1,b:4,c:[51],
+  p:"Streets that invite through-traffic can never be safe or calm.",
+  o:"shape local roads as loops, so no route ever shortcuts through a neighborhood."},
+ {n:51,name:"Green Streets",s:1,b:4,c:[60],
+  p:"Sheets of asphalt bake and deaden the ground between homes.",
+  o:"pave quiet local streets with grass and stones, and line them with trees."},
+ {n:52,name:"Network of Paths and Cars",s:2,b:4,c:[55,56],
+  p:"Where cars and people share every single route, both of them lose.",
+  o:"lay footpaths and roads as two overlapping networks that cross but never merge."},
+ {n:55,name:"Raised Walk",s:1,b:4,c:[92],
+  p:"Beside fast traffic, walking at the road's own level feels unsafe.",
+  o:"lift the sidewalk a step above the roadway so walkers feel protected and seen."},
+ {n:56,name:"Bike Paths and Racks",s:1,b:4,c:[],
+  p:"Bikes forced to share lanes with cars are endangered and discouraged.",
+  o:"give bicycles their own protected network, with racks at every destination."},
+ {n:57,name:"Children in the City",s:1,b:4,c:[56],
+  p:"A city ruled by cars is no place a child can safely roam alone.",
+  o:"thread safe green paths so children can reach the whole city on their own."},
+ {n:58,name:"Carnival",s:1,b:5,c:[69],
+  p:"Ordinary life offers no release for the wild, the strange, the excessive.",
+  o:"set aside a place and time for carnival — the city's own licensed madness."},
+ {n:59,name:"Quiet Backs",s:1,b:5,c:[],
+  p:"Unbroken public bustle wears people down with no place to recover.",
+  o:"behind the busy streets, keep quiet backs where one can walk in peace."},
+ {n:60,name:"Accessible Green",s:2,b:5,c:[62,67],
+  p:"A park too far away goes unused, however beautiful it may be.",
+  o:"place a piece of living green within three minutes' walk of every home."},
+ {n:61,name:"Small Public Squares",s:2,b:5,c:[62,69,88,94],
+  p:"A square built too large feels empty, and no one ever lingers there.",
+  o:"keep public squares small — about sixty feet across feels alive, not deserted."},
+ {n:62,name:"High Places",s:1,b:5,c:[],
+  p:"A city with no high point gives people nowhere to grasp the whole of it.",
+  o:"build accessible high places people can climb to see where they live."},
+ {n:67,name:"Common Land",s:2,b:5,c:[69],
+  p:"Without shared ground, community has no physical place in which to happen.",
+  o:"reserve common land — at least a quarter of the whole — free for everyone to use."},
+ {n:69,name:"Public Outdoor Room",s:1,b:5,c:[88,90],
+  p:"Open outdoor space with no shelter or edge simply stays empty.",
+  o:"make a partly-roofed outdoor room where people can sit, wait, and gather."},
+ {n:79,name:"Your Own Home",s:2,b:6,c:[],
+  p:"People who cannot shape their own dwelling never quite come to belong.",
+  o:"let every household own — and freely remake — the home it lives in."},
+ {n:87,name:"Individually Owned Shops",s:1,b:6,c:[89],
+  p:"Chain stores slowly drain a place of its care and its character.",
+  o:"favor small, individually owned shops run by the people behind the counter."},
+ {n:88,name:"Street Cafe",s:2,b:6,c:[],
+  p:"A community needs an easy place to sit and watch the world go by.",
+  o:"encourage small street cafes where people linger over the passing life."},
+ {n:89,name:"Corner Grocery",s:1,b:6,c:[],
+  p:"Distant supermarkets put the day's small needs a whole car-trip away.",
+  o:"keep a corner grocery within an easy walk of every home."},
+ {n:90,name:"Beer Hall",s:1,b:6,c:[],
+  p:"People need a place for open, unguarded, public drinking together.",
+  o:"make big convivial beer halls where strangers share long common tables."},
+ {n:92,name:"Bus Stop",s:1,b:6,c:[93],
+  p:"Bleak, isolated bus stops make public transport miserable to use.",
+  o:"build each stop as a small place — sheltered, near shops, worth the wait."},
+ {n:93,name:"Food Stands",s:1,b:6,c:[],
+  p:"A street with nowhere to grab quick food loses much of its life.",
+  o:"scatter small food stands right where people already walk and gather."},
+ {n:94,name:"Sleeping in Public",s:1,b:6,c:[],
+  p:"A city that forbids all public rest is hostile to the tired and the poor.",
+  o:"make it safe and accepted to lie down and nap in certain public places."},
+];
+
+/* ---- derived indexes ---- */
+const byN={}; P.forEach(p=>byN[p.n]=p);
+const parents={}; P.forEach(p=>parents[p.n]=[]);
+P.forEach(p=>p.c.forEach(k=>{ if(byN[k]) parents[k].push(p.n); }));
+const ROOTS=P.filter(p=>parents[p.n].length===0).map(p=>p.n); // just #1
+const MAX_LIFE=P.reduce((a,p)=>a+p.s+1,0);
+const bandVar=b=>`var(--b${b})`;
+const stars=s=>"★".repeat(s)+"☆".repeat(2-s);
+const confWord=s=>["a tentative pattern","a pattern with real evidence","a deep, invariant truth"][s];
+
+/* ============ STATE ============ */
+let placed;      // Set of pattern numbers on the board
+let via;         // n -> parent n it was woven through (draw thread)
+let selected;    // currently read pattern n (or null=intro)
+let alive=false;
+
+function available(){ // patterns not placed with >=1 parent placed
+  return P.filter(p=>!placed.has(p.n) && parents[p.n].some(pp=>placed.has(pp)))
+          .map(p=>p.n)
+          .sort((a,b)=> byN[a].b-byN[b].b || a-b);
+}
+function isAvailable(n){ return !placed.has(n) && parents[n].some(pp=>placed.has(pp)); }
+
+/* ============ INIT ============ */
+function init(){
+  placed=new Set(); via={}; selected=null; alive=false;
+  ROOTS.forEach(n=>placed.add(n)); // seed: #1 Independent Regions
+  buildLadder(); buildDots();
+  selected=ROOTS[0];
+  renderAll();
+}
+
+/* ============ LADDER ============ */
+function buildLadder(){
+  const el=document.getElementById("rungs");
+  el.innerHTML="";
+  BANDS.forEach((bd,i)=>{
+    const d=document.createElement("div");
+    d.className="rung"; d.style.setProperty("--bh",bandVar(i));
+    d.dataset.band=i;
+    d.innerHTML=`<div class="rn">${String(i+1).padStart(2,"0")} · ${bd.range}</div>
+      <div class="rname">${bd.name}</div>
+      <div class="rcount"><b class="c">0</b> woven</div>`;
+    el.appendChild(d);
+  });
+}
+function buildDots(){
+  const el=document.getElementById("banddots"); el.innerHTML="";
+  BANDS.forEach((_,i)=>{ const s=document.createElement("i"); s.style.setProperty("--bh",bandVar(i)); el.appendChild(s); });
+}
+
+/* ============ RENDER ============ */
+function renderAll(){ renderDraft(); renderReader(); renderDeck(); renderMeters(); }
+
+function renderMeters(){
+  const woven=placed.size;
+  const life=[...placed].reduce((a,n)=>a+byN[n].s+1,0);
+  const pct=Math.round(life/MAX_LIFE*100);
+  const bandsLit=new Set([...placed].map(n=>byN[n].b));
+  document.getElementById("lifeFill").style.width=pct+"%";
+  document.getElementById("lifePct").textContent=pct+"%";
+  document.getElementById("wovenN").textContent=woven;
+  document.getElementById("wovenBig").textContent=woven;
+  document.getElementById("bandsN").textContent=bandsLit.size;
+  document.getElementById("deckCnt").textContent=available().length;
+  // dots
+  [...document.getElementById("banddots").children].forEach((d,i)=>d.classList.toggle("lit",bandsLit.has(i)));
+  // ladder counts + active
+  [...document.getElementById("rungs").children].forEach(r=>{
+    const b=+r.dataset.band;
+    const cnt=[...placed].filter(n=>byN[n].b===b).length;
+    r.querySelector(".c").textContent=cnt;
+    r.classList.toggle("active",selected!=null && byN[selected].b===b);
+  });
+  // win
+  if(bandsLit.size===7 && woven>=18 && !alive){ alive=true; document.getElementById("draft").classList.add("alive"); showWin(); }
+}
+
+function renderDraft(){
+  const scroll=document.getElementById("draftscroll");
+  const stage=document.getElementById("stage");
+  const nodesEl=document.getElementById("nodes");
+  const svg=document.getElementById("threads");
+
+  // group placed by band
+  const groups={}; BANDS.forEach((_,i)=>groups[i]=[]);
+  [...placed].sort((a,b)=>a-b).forEach(n=>groups[byN[n].b].push(n));
+
+  const rowH=Math.max(84, Math.floor((scroll.clientHeight-8)/7));
+  const usedBands=BANDS.map((_,i)=>groups[i].length).map((k,i)=>({i,k}));
+  const maxK=Math.max(1,...usedBands.map(u=>u.k));
+  const W=Math.max(scroll.clientWidth-4, maxK*150+40);
+  const H=rowH*7;
+  stage.style.width=W+"px"; stage.style.height=H+"px";
+  svg.setAttribute("viewBox",`0 0 ${W} ${H}`);
+
+  // positions
+  const pos={};
+  BANDS.forEach((_,b)=>{
+    const arr=groups[b]; const y=b*rowH+rowH/2;
+    arr.forEach((n,idx)=>{ pos[n]={x:W*(idx+1)/(arr.length+1), y}; });
+  });
+
+  // threads
+  let paths="";
+  [...placed].forEach(n=>{
+    const v=via[n]; if(v==null||!pos[v]||!pos[n]) return;
+    const a=pos[v], b=pos[n];
+    const midY=(a.y+b.y)/2;
+    const d=`M ${a.x} ${a.y+22} C ${a.x} ${midY}, ${b.x} ${midY}, ${b.x} ${b.y-22}`;
+    const len=Math.hypot(b.x-a.x,b.y-a.y)+Math.abs(b.y-a.y);
+    const w=1+byN[n].s*0.7;
+    paths+=`<path class="thread" d="${d}" stroke-width="${w}" opacity="0.5" style="--len:${Math.round(len)}"/>`;
+  });
+  svg.innerHTML=paths;
+
+  // row separators + labels (behind nodes)
+  let deco="";
+  BANDS.forEach((bd,b)=>{
+    const y=b*rowH;
+    deco+=`<div class="rowsep" style="top:${y}px"></div>`;
+    deco+=`<div class="rowlabel" style="top:${b*rowH+16}px;--bh:${bandVar(b)}">${bd.name}</div>`;
+  });
+
+  // nodes
+  let html="";
+  [...placed].forEach(n=>{
+    const p=byN[n], ps=pos[n]; if(!ps) return;
+    const seed=ROOTS.includes(n)?" seed":"";
+    const sel=selected===n?" sel":"";
+    html+=`<button class="node${seed}${sel}" data-n="${n}" style="left:${ps.x}px;top:${ps.y}px;--nh:${bandVar(p.b)}">
+      <span class="nid mono">№${p.n}<span class="nstars">${stars(p.s)}</span></span>
+      <span class="nname">${p.name}</span>
+    </button>`;
+  });
+  nodesEl.innerHTML=deco+html;
+  nodesEl.querySelectorAll(".node").forEach(b=>b.onclick=()=>select(+b.dataset.n));
+}
+
+function renderReader(){
+  const el=document.getElementById("reader");
+  if(selected==null){
+    el.classList.add("intro");
+    el.innerHTML=introHTML();
+    return;
+  }
+  el.classList.remove("intro");
+  const p=byN[selected];
+  const on=placed.has(p.n), avail=isAvailable(p.n);
+  const statusHTML = on
+    ? `<span class="status on">◈ woven into the town</span>`
+    : avail
+      ? `<span class="status ready">◇ ready to weave</span>`
+      : `<span class="status locked">◌ not yet reachable</span>`;
+
+  // parent links (larger patterns that hold this one)
+  const par=parents[p.n];
+  const parHTML = par.length? par.map(k=>{
+    const cls = placed.has(k)?"chip on":(byN[k]?"chip need":"chip");
+    return `<button class="${cls}" data-goto="${k}">№${k} ${byN[k]?byN[k].name:""}</button>`;
+  }).join("") : `<span class="rd-conf">a root of the language — it begins the town</span>`;
+
+  // child links (smaller patterns it helps complete)
+  const kids=p.c.filter(k=>byN[k]);
+  const kidHTML = kids.length? kids.map(k=>{
+    const cls = placed.has(k)?"chip on":"chip";
+    return `<button class="${cls}" data-goto="${k}">№${k} ${byN[k].name}</button>`;
+  }).join("") : `<span class="rd-conf">a leaf — the town rests here</span>`;
+
+  // weave affordance
+  let action="";
+  if(on){
+    action=`<button class="weave-btn" disabled>Already woven</button>`;
+  } else if(avail){
+    action=`<button class="weave-btn" id="weaveBtn">Weave into the town ↦</button>
+      <p class="weave-note">It will hang from ${par.filter(k=>placed.has(k)).map(k=>"№"+k).join(", ")}, already on your draft.</p>`;
+  } else {
+    const need=par.filter(k=>!placed.has(k));
+    action=`<button class="weave-btn" disabled>Locked</button>
+      <p class="weave-note">First weave a larger pattern that holds it — try ${need.slice(0,2).map(k=>"№"+k+" "+byN[k].name).join(" or ")}.</p>`;
+  }
+
+  el.innerHTML=`
+    <span class="rd-band" style="--nh:${bandVar(p.b)}">${BANDS[p.b].name}</span>
+    <div class="rd-title">${p.name}</div>
+    <div><span class="rd-num mono">Pattern № ${p.n}</span> · <span class="rd-stars">${stars(p.s)}</span></div>
+    <div class="rd-conf">${confWord(p.s)}</div>
+    ${statusHTML}
+    <div class="rd-sect"><div class="lbl">The Problem</div><div class="txt">${p.p}</div></div>
+    <div class="rd-sect sol"><div class="lbl">The Resolution</div><div class="txt">${p.o}</div></div>
+    <div class="rd-sect"><div class="lbl">Held within larger patterns</div><div class="rd-links">${parHTML}</div></div>
+    <div class="rd-sect"><div class="lbl">Completed by smaller patterns</div><div class="rd-links">${kidHTML}</div></div>
+    ${action}
+  `;
+  const wb=document.getElementById("weaveBtn");
+  if(wb) wb.onclick=()=>weave(p.n);
+  el.querySelectorAll("[data-goto]").forEach(b=>b.onclick=()=>select(+b.dataset.goto));
+}
+
+function renderDeck(){
+  const el=document.getElementById("decklist");
+  const av=available();
+  if(!av.length){ el.innerHTML=`<div class="none">The town rests. Every reachable pattern is woven.</div>`; return; }
+  el.innerHTML=av.map(n=>{
+    const p=byN[n], sel=selected===n?" sel":"";
+    return `<button class="dcard${sel}" data-n="${n}" style="--nh:${bandVar(p.b)}">
+      <span class="dn mono">№${p.n}</span>
+      <span class="dname">${p.name}</span>
+      <span class="dstars">${stars(p.s)}</span>
+    </button>`;
+  }).join("");
+  el.querySelectorAll(".dcard").forEach(b=>b.onclick=()=>select(+b.dataset.n));
+}
+
+/* ============ ACTIONS ============ */
+function select(n){ selected=n; renderReader(); renderDeck(); renderMeters(); highlightSel(); }
+function highlightSel(){
+  document.querySelectorAll(".node").forEach(b=>b.classList.toggle("sel",+b.dataset.n===selected));
+}
+
+function weave(n){
+  if(placed.has(n)||!isAvailable(n)) return;
+  // choose the strongest parent already on board to hang from
+  const cand=parents[n].filter(k=>placed.has(k)).sort((a,b)=>byN[b].s-byN[a].s || a-b);
+  via[n]=cand[0];
+  placed.add(n); selected=n;
+  renderAll();
+  const p=byN[n];
+  toast(`Woven <b>№${p.n} ${p.name}</b> beneath №${via[n]} ${byN[via[n]].name}.`);
+}
+
+/* ============ TOAST ============ */
+let toastT;
+function toast(msg){
+  const t=document.getElementById("toast");
+  t.innerHTML=msg; t.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600);
+}
+
+/* ============ INTRO / WIN ============ */
+function introHTML(){
+  return `<div class="rd-open">
+    <p>Christopher Alexander wrote the town not as a plan but as a <b>language</b> — 253 patterns that fit together, the large ones giving shelter to the small.</p>
+    <ol>
+      <li><b>Begin at the region.</b> Your draft is seeded with <b>№1 Independent Regions</b>. Everything grows down from it.</li>
+      <li><b>Read, then weave.</b> Pick any card from <b>Ready to weave</b>. It can only join the town if a larger pattern that holds it is already on your draft.</li>
+      <li><b>Bring it to life.</b> Light all seven scales, from Region down to the corner cafe, and the town comes alive.</li>
+    </ol>
+    <p style="font-style:italic;color:var(--ink-faint)">Select a woven pattern on the draft, or a card at right, to read its problem and resolution here.</p>
+  </div>`;
+}
+
+function showHow(){
+  const m=document.getElementById("modal");
+  m.className="modal";
+  m.innerHTML=`
+    <p class="eyebrow">How to play</p>
+    <h2>Weave a town, largest to smallest.</h2>
+    <ol>
+      <li><b>Start at the region.</b> The draft begins with №1 Independent Regions — the root of the whole language.</li>
+      <li><b>Weave downward.</b> Open a card in <b>Ready to weave</b>, read its problem &amp; resolution, then weave it. A pattern can only join once a larger pattern that <em>holds</em> it is already on the draft — exactly the network Alexander built into the book.</li>
+      <li><b>Follow the threads.</b> Green threads show how patterns nest. Chips in the reader jump you along the language, both up and down.</li>
+      <li><b>Bring it to life.</b> Fill all seven scales — Region → City → Community → Neighborhood → Paths → Common Space → Local Life — and the town comes alive.</li>
+    </ol>
+    <button class="start" id="closeHow">Return to the draft</button>`;
+  openOverlay();
+  document.getElementById("closeHow").onclick=closeOverlay;
+}
+function showWin(){
+  const m=document.getElementById("modal");
+  m.className="modal win";
+  const life=Math.round([...placed].reduce((a,n)=>a+byN[n].s+1,0)/MAX_LIFE*100);
+  m.innerHTML=`
+    <div class="bloom">❧ ✦ ❧</div>
+    <p class="eyebrow" style="text-align:center">The quality without a name</p>
+    <h2 style="text-align:center">The town has come alive.</h2>
+    <p style="text-align:center">You wove <b>${placed.size} patterns</b> across all seven scales — a coherent language reaching <b>${life}% life</b>, from the independent region down to a place to sit in the sun.</p>
+    <p style="text-align:center;font-style:italic;color:var(--ink-faint)">“The elements are patterns... and the patterns are alive.”</p>
+    <button class="start" id="closeWin">Keep weaving</button>`;
+  openOverlay();
+  document.getElementById("closeWin").onclick=closeOverlay;
+}
+function openOverlay(){ document.getElementById("overlay").classList.add("show"); }
+function closeOverlay(){ document.getElementById("overlay").classList.remove("show"); }
+
+/* ============ THEME ============ */
+function toggleTheme(){
+  const root=document.documentElement;
+  const cur=root.getAttribute("data-theme");
+  const sysDark=matchMedia("(prefers-color-scheme:dark)").matches;
+  const now = cur ? cur : (sysDark?"dark":"light");
+  root.setAttribute("data-theme", now==="dark"?"light":"dark");
+  renderDraft();
+}
+
+/* ============ WIRING ============ */
+document.getElementById("howBtn").onclick=showHow;
+document.getElementById("themeBtn").onclick=toggleTheme;
+document.getElementById("resetBtn").onclick=()=>{ document.getElementById("draft").classList.remove("alive"); init(); toast("The draft is cleared. Begin again at the region."); };
+document.getElementById("overlay").onclick=e=>{ if(e.target.id==="overlay") closeOverlay(); };
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeOverlay(); });
+
+let rt;
+new ResizeObserver(()=>{ clearTimeout(rt); rt=setTimeout(renderDraft,120); }).observe(document.getElementById("draftscroll"));
+
+init();
+</script>

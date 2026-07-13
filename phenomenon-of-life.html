@@ -1,0 +1,843 @@
+<title>The Phenomenon of Life — The Fifteen Properties</title>
+<style>
+  :root{
+    --paper:#E4DBC6; --panel:#EDE6D5; --panel-2:#E7DFCC;
+    --ink:#2C2620; --ink-soft:#6C6353; --ink-faint:#938872;
+    --line:rgba(44,38,32,.15); --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346; --life-bright:#7B9A4E; --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C; --gold:#A9812B; --shadow:rgba(52,44,32,.16);
+    --radius:10px;
+    --serif:"Hoefler Text","Iowan Old Style",Palatino,"Palatino Linotype",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#171511; --panel:#201C16; --panel-2:#251F17;
+      --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+      --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+      --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+      --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#E4DBC6; --panel:#EDE6D5; --panel-2:#E7DFCC;
+    --ink:#2C2620; --ink-soft:#6C6353; --ink-faint:#938872;
+    --line:rgba(44,38,32,.15); --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346; --life-bright:#7B9A4E; --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C; --gold:#A9812B; --shadow:rgba(52,44,32,.16);
+  }
+  :root[data-theme="dark"]{
+    --paper:#171511; --panel:#201C16; --panel-2:#251F17;
+    --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+    --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+    --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+    --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 18% 10%,rgba(255,255,255,.05),transparent 45%),
+      radial-gradient(circle at 84% 92%,rgba(0,0,0,.04),transparent 55%);}
+  .mono{font-family:var(--mono)}
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--life-bright);outline-offset:2px;border-radius:4px}
+
+  .app{max-width:1400px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:clamp(12px,2.4vw,28px);gap:16px}
+
+  header.top{display:grid;grid-template-columns:1fr auto;align-items:end;gap:16px;border-bottom:1.5px solid var(--line-strong);padding-bottom:14px}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 6px}
+  h1.title{font-weight:600;font-size:clamp(1.8rem,4.2vw,2.9rem);line-height:.98;margin:0;letter-spacing:-.02em;text-wrap:balance}
+  h1.title em{font-style:italic;color:var(--life)}
+  .subtitle{color:var(--ink-soft);font-size:.95rem;margin:.5rem 0 0;max-width:58ch;font-style:italic}
+  .head-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:transparent;
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:8px 12px;border-radius:99px;transition:.18s}
+  .btn:hover{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+
+  .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px}
+  .tab{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:transparent;border:none;
+    color:var(--ink-soft);padding:7px 15px;border-radius:99px;transition:.18s}
+  .tab.on{background:var(--life);color:#fff}
+  :root[data-theme="dark"] .tab.on{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tab.on{color:#14130e}}
+
+  .commission{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:12px 18px;box-shadow:0 1px 0 var(--shadow)}
+  .commission .goal{flex:1 1 240px;min-width:210px}
+  .commission .goal .glabel{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);display:block;margin-bottom:2px}
+  .meters{display:flex;gap:22px;align-items:center;flex-wrap:wrap}
+  .meter{min-width:170px}
+  .meter .mlabel{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;align-items:center}
+  .meter .mval{color:var(--ink);font-variant-numeric:tabular-nums}
+  .lifebar{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+  .lifebar>span{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--life),var(--life-bright));
+    box-shadow:0 0 10px var(--life-glow);transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .lifebar.crowded>span{background:linear-gradient(90deg,var(--clay),#c58a4e);box-shadow:0 0 10px rgba(167,90,60,.4)}
+  .lifelabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:99px;
+    background:var(--line);color:var(--ink-soft)}
+  .lifelabel.alive{background:var(--life-glow);color:var(--life)}
+  .lifelabel.crowded{background:color-mix(in srgb,var(--clay) 18%,transparent);color:var(--clay)}
+  .propdots{display:flex;gap:4px;flex-wrap:wrap;max-width:230px}
+  .propdots i{width:11px;height:11px;border-radius:3px;background:var(--line);border:1px solid var(--line-strong);transition:.3s}
+  .propdots i.lit{background:var(--life);border-color:transparent;box-shadow:0 0 6px var(--life-glow)}
+
+  .work{display:grid;gap:16px;flex:1;min-height:0;grid-template-columns:250px minmax(0,1fr) 372px;align-items:stretch}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 var(--shadow)}
+  .card-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);
+    padding:13px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+  .fifteen{display:flex;flex-direction:column;overflow:hidden}
+  .flist{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:5px;flex:1}
+  .prow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px;padding:8px 11px;transition:.15s}
+  .prow:hover{border-color:var(--life);background:var(--life-glow);transform:translateX(2px)}
+  .prow.sel{border-color:var(--life);box-shadow:inset 0 0 0 1px var(--life)}
+  .prow .pn{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .prow.applied .pn{color:var(--life)}
+  .pname{font-size:.86rem;font-weight:600;line-height:1.05}
+  .pcheck{width:19px;height:19px;border-radius:50%;border:1.6px solid var(--line-strong);display:grid;place-items:center;font-size:11px;color:transparent;transition:.2s}
+  .prow.applied .pcheck{background:var(--life);border-color:var(--life);color:#fff}
+  :root[data-theme="dark"] .prow.applied .pcheck{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .prow.applied .pcheck{color:#14130e}}
+
+  .specimen{display:flex;flex-direction:column;overflow:hidden}
+  .specimen .card-h .alive{color:var(--life);opacity:0;transition:.4s;font-weight:600}
+  .specimen.alive .card-h .alive{opacity:1}
+  .canvaswrap{flex:1;display:grid;place-items:center;padding:clamp(10px,2vw,26px);min-height:0;position:relative}
+  .canvasframe{position:relative;width:min(100%,72vh);aspect-ratio:1/1;max-height:100%}
+  #specimen{width:100%;height:100%;display:block;border-radius:4px}
+  .controls{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--line);flex-wrap:wrap;justify-content:center;align-items:center}
+  .ctrl{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;background:var(--panel-2);
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:9px 14px;border-radius:8px;transition:.16s}
+  .ctrl:hover{border-color:var(--life);color:var(--life)}
+  .ctrl.primary{background:var(--life);border-color:var(--life);color:#fff}
+  :root[data-theme="dark"] .ctrl.primary{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ctrl.primary{color:#14130e}}
+  .ctrl.primary:hover{background:var(--life-bright)}
+  select.ctrl{appearance:none;-webkit-appearance:none;padding-right:26px;
+    background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+    background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+  .reader-card{display:flex;flex-direction:column;overflow:hidden}
+  .reader{padding:16px 18px;overflow:auto;flex:1;min-height:0}
+  .reader.intro .rd-open{display:block}
+  .rd-open{color:var(--ink-soft)}
+  .rd-open p{margin:.2rem 0 1rem}
+  .rd-open .lead{font-size:1.02rem;color:var(--ink)}
+  .rd-open ol{margin:0;padding-left:1.15rem}
+  .rd-open li{margin-bottom:.7rem}
+  .rd-open li b{color:var(--ink);font-weight:600}
+  .rd-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--life);display:inline-flex;align-items:center;gap:7px}
+  .rd-kicker::before{content:"";width:9px;height:9px;border-radius:2px;background:var(--life)}
+  .rd-title{font-size:1.55rem;font-weight:600;line-height:1.04;margin:.15rem 0 .1rem;text-wrap:balance;letter-spacing:-.01em}
+  .status{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:99px;margin-top:8px}
+  .status.on{background:var(--life-glow);color:var(--life)}
+  .status.off{background:color-mix(in srgb,var(--clay) 15%,transparent);color:var(--clay)}
+  .rd-sect{margin-top:1rem}
+  .rd-sect .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .rd-sect .txt{line-height:1.5}
+  .rd-sect.why .txt::before{content:"Why it gives life — ";font-style:italic;color:var(--life);font-weight:600}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .cmp{display:flex;flex-direction:column;gap:5px}
+  .cmp canvas{width:100%;aspect-ratio:1/1;border:1px solid var(--line);border-radius:6px;display:block}
+  .cmp .cl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;text-align:center}
+  .cmp.without .cl{color:var(--clay)}
+  .cmp.with .cl{color:var(--life)}
+
+  /* granular controls */
+  .apply-btn{display:block;width:100%;margin-top:16px;padding:13px;border-radius:8px;border:none;font-family:var(--mono);font-size:12px;
+    letter-spacing:.16em;text-transform:uppercase;font-weight:600;transition:.18s}
+  .apply-btn.add{background:var(--life);color:#fff;box-shadow:0 3px 12px var(--life-glow)}
+  .apply-btn.remove{background:transparent;color:var(--clay);border:1px solid var(--clay)}
+  :root[data-theme="dark"] .apply-btn.add{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .apply-btn.add{color:#14130e}}
+  .apply-btn.add:hover{background:var(--life-bright);transform:translateY(-1px)}
+  .apply-btn.remove:hover{background:color-mix(in srgb,var(--clay) 12%,transparent)}
+  .adjust{margin-top:16px;border-top:1px dashed var(--line-strong);padding-top:14px}
+  .adjust>.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .adjust>.lbl::before{content:"◇";color:var(--life)}
+  .slider{margin-bottom:13px}
+  .slider .srow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px}
+  .slider .srow .sval{color:var(--life);font-variant-numeric:tabular-nums}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:99px;
+    background:linear-gradient(90deg,var(--life) var(--fill,50%),var(--line-strong) var(--fill,50%));outline:none;margin:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--life);
+    cursor:pointer;border:2px solid var(--panel);box-shadow:0 1px 3px var(--shadow)}
+  input[type=range]::-moz-range-thumb{width:15px;height:15px;border-radius:50%;background:var(--life);cursor:pointer;border:2px solid var(--panel)}
+
+  .train{display:none;flex:1;min-height:0}
+  .train.on{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:16px}
+  .arena{display:flex;flex-direction:column;overflow:hidden}
+  .duel{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,2vw,26px);padding:clamp(12px,2.2vw,28px);min-height:0;place-items:center}
+  .spec-choice{width:100%;max-width:46vh;display:flex;flex-direction:column;gap:10px;align-items:center}
+  .spec-choice canvas{width:100%;aspect-ratio:1/1;border:2px solid var(--line);border-radius:6px;display:block;transition:.18s;cursor:pointer}
+  .spec-choice.pick canvas{border-color:var(--life);box-shadow:0 0 0 3px var(--life-glow)}
+  .spec-choice.win canvas{border-color:var(--life)}
+  .spec-choice.lose canvas{border-color:var(--clay);opacity:.72}
+  .choose-btn{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;background:var(--panel-2);
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:9px 22px;border-radius:99px;transition:.16s}
+  .choose-btn:hover{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+  .duel-q{text-align:center;font-style:italic;color:var(--ink-soft);padding:14px 16px 0}
+  .train-side{display:flex;flex-direction:column;overflow:hidden}
+  .train-body{padding:16px 18px;overflow:auto;flex:1}
+  .train-body h3{font-size:1.15rem;margin:.3rem 0 .4rem;font-weight:600;line-height:1.1}
+  .verdict{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-radius:8px;margin:2px 0 12px}
+  .verdict.right{background:var(--life-glow);color:var(--life)}
+  .verdict.wrong{background:color-mix(in srgb,var(--clay) 16%,transparent);color:var(--clay)}
+  .lifecmp{display:flex;flex-direction:column;gap:9px;margin:10px 0}
+  .lifecmp .lc{display:grid;grid-template-columns:64px 1fr auto;gap:9px;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .lifecmp .lc .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+  .lifecmp .lc .bar>span{display:block;height:100%;border-radius:99px}
+  .lifecmp .lc.hi .bar>span{background:linear-gradient(90deg,var(--life),var(--life-bright))}
+  .lifecmp .lc.lo .bar>span{background:linear-gradient(90deg,var(--clay),#c58a4e)}
+  .lifecmp .lc .n{color:var(--ink);font-variant-numeric:tabular-nums}
+  .reason{color:var(--ink-soft);line-height:1.5;margin:6px 0}
+  .reason b{color:var(--ink)}
+  .kicker-note{background:color-mix(in srgb,var(--gold) 14%,transparent);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 6px 6px 0;
+    font-size:.86rem;color:var(--ink-soft);margin-top:10px}
+  .kicker-note b{color:var(--gold)}
+  .next-btn{display:none;width:100%;margin-top:16px;padding:13px;border:none;border-radius:8px;background:var(--life);color:#fff;font-family:var(--mono);
+    font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+  :root[data-theme="dark"] .next-btn{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .next-btn{color:#14130e}}
+  .next-btn.show{display:block}
+  .next-btn:hover{background:var(--life-bright)}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);
+    padding:12px 20px;border-radius:99px;font-size:.9rem;box-shadow:0 8px 30px var(--shadow);opacity:0;pointer-events:none;
+    transition:.35s cubic-bezier(.22,1,.36,1);z-index:60;max-width:90vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--life-bright)}
+
+  .overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 55%,transparent);display:grid;place-items:center;padding:20px;z-index:80;
+    opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(3px)}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .modal{background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;max-width:600px;width:100%;padding:clamp(22px,4vw,38px);
+    box-shadow:0 24px 70px var(--shadow);transform:translateY(12px) scale(.98);transition:.35s cubic-bezier(.22,1,.36,1);max-height:88vh;overflow:auto}
+  .overlay.show .modal{transform:none}
+  .modal .eyebrow{color:var(--life)}
+  .modal h2{font-size:clamp(1.5rem,4vw,2.1rem);margin:.1rem 0 .5rem;font-weight:600;line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+  .modal p{color:var(--ink-soft);margin:.4rem 0}
+  .modal ol{color:var(--ink-soft);padding-left:1.15rem;margin:1rem 0}
+  .modal ol li{margin-bottom:.7rem}
+  .modal ol li b{color:var(--ink);font-weight:600}
+  .modal .start{margin-top:14px;width:100%;padding:14px;border:none;border-radius:9px;background:var(--life);color:#fff;font-family:var(--mono);
+    font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;transition:.18s}
+  :root[data-theme="dark"] .modal .start{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .modal .start{color:#14130e}}
+  .modal .start:hover{background:var(--life-bright)}
+  .modal.win .bloom{font-size:2.2rem;text-align:center;color:var(--life);margin-bottom:.3rem}
+
+  @media (max-width:1120px){.work{grid-template-columns:210px minmax(0,1fr) 330px}}
+  @media (max-width:900px){
+    .work{grid-template-columns:1fr}
+    .fifteen{order:3;max-height:320px}.specimen{order:1}.reader-card{order:2}
+    .canvasframe{width:min(100%,60vh)}
+    .train.on{grid-template-columns:1fr}.train-side{max-height:400px}
+    header.top{grid-template-columns:1fr}.head-tools{justify-content:flex-start}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">The Nature of Order · Book One · Christopher Alexander</p>
+      <h1 class="title">The Phenomenon of <em>Life</em></h1>
+      <p class="subtitle">Some things are more alive than others — objectively. Alexander found fifteen geometric properties behind that life. But life is not the sum of them: it is their balance. Tune each one, and find the point where the whole comes alive.</p>
+    </div>
+    <div class="head-tools">
+      <div class="tabs">
+        <button class="tab on" data-tab="study">Compose life</button>
+        <button class="tab" data-tab="train">Train the eye</button>
+      </div>
+      <button class="btn" id="howBtn">How to play</button>
+      <button class="btn" id="themeBtn">Theme</button>
+    </div>
+  </header>
+
+  <!-- STUDY -->
+  <div id="studyWrap">
+    <div class="commission">
+      <div class="goal">
+        <span class="glabel">The Work</span>
+        <b>Find the living whole.</b> Not by adding everything — by balancing. Ornament without rest kills life.
+      </div>
+      <div class="meters">
+        <div class="meter">
+          <div class="mlabel"><span>Degree of life</span><span><span class="lifelabel" id="lifeLabel">lifeless</span> <span class="mval" id="lifePct">0%</span></span></div>
+          <div class="lifebar" id="lifebar"><span id="lifeFill"></span></div>
+        </div>
+        <div class="meter" style="min-width:auto">
+          <div class="mlabel"><span>Properties present</span><span class="mval"><span id="propN">0</span>/15</span></div>
+          <div class="propdots" id="propdots"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="work">
+      <aside class="card fifteen">
+        <div class="card-h"><span>The Fifteen Properties</span></div>
+        <div class="flist" id="flist"></div>
+      </aside>
+
+      <section class="card specimen" id="specimenCard">
+        <div class="card-h"><span>The Specimen — a Persian carpet</span><span class="alive">◈ alive</span></div>
+        <div class="canvaswrap"><div class="canvasframe"><canvas id="specimen"></canvas></div></div>
+        <div class="controls">
+          <select class="ctrl" id="paletteSel" title="Colour palette"></select>
+          <button class="ctrl" id="surpriseBtn">✦ Surprise me</button>
+          <button class="ctrl" id="compareBtn">Hold: lifeless</button>
+          <button class="ctrl" id="clearBtn">Clear</button>
+          <button class="ctrl primary" id="allBtn2">Apply all</button>
+        </div>
+      </section>
+
+      <aside class="card reader-card">
+        <div class="card-h">The Property</div>
+        <div class="reader intro" id="reader"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- TRAIN -->
+  <div class="train" id="trainWrap">
+    <section class="card arena">
+      <div class="card-h"><span>The Mirror of the Self</span><span class="mono" id="trainScore">0 / 0 · streak 0</span></div>
+      <p class="duel-q">Which has the greater degree of life? Not which is busier — ask which feels more whole, more like a picture of your own self at ease. Then click it.</p>
+      <div class="duel">
+        <div class="spec-choice" data-side="0"><canvas data-c="0"></canvas><button class="choose-btn" data-choose="0">This one has more life</button></div>
+        <div class="spec-choice" data-side="1"><canvas data-c="1"></canvas><button class="choose-btn" data-choose="1">This one has more life</button></div>
+      </div>
+    </section>
+    <aside class="card train-side">
+      <div class="card-h">The Reading</div>
+      <div class="train-body" id="trainBody"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   THE FIFTEEN FUNDAMENTAL PROPERTIES
+   The Nature of Order, Book One: The Phenomenon of Life.
+   Definitions paraphrased for learning.
+   ============================================================ */
+const PROPS=[
+ {n:1,name:"Levels of Scale",def:"A balanced range of sizes among the centers — big, medium, and small — with jumps between them that are neither too large nor too even (roughly one to two, up to one to four).",why:"each center is held up by ones a little larger and a little smaller, so the eye can move all the way in and all the way out without ever falling off a cliff."},
+ {n:2,name:"Strong Centers",def:"A definite field of force with a clear focus, toward which the other centers all point and which they, in turn, reinforce.",why:"a whole needs a heart — a place the whole thing gathers around — or it drifts apart into unrelated pieces."},
+ {n:3,name:"Boundaries",def:"A thick edge, itself made of centers, that surrounds and completes the thing it bounds — at once separating it and tying it to what lies beyond.",why:"a real boundary focuses a center inward while connecting it outward, so the center becomes distinct without becoming cut off."},
+ {n:4,name:"Alternating Repetition",def:"Centers that repeat — and the repetition made stronger because a second kind of center alternates with the first.",why:"the alternation turns the spaces in between into centers too, so the rhythm is doubly alive instead of a flat, mechanical drumbeat."},
+ {n:5,name:"Positive Space",def:"Every center swells outward and is convex; and the space between the centers is just as shaped and positive as the centers themselves — nothing is left over.",why:"when even the 'empty' space is a center in its own right, the whole surface is full of life, with no dead residue between the parts."},
+ {n:6,name:"Good Shape",def:"A center built from the simplest, most coherent shapes — shapes which are themselves made of strong centers, and which feel whole standing alone.",why:"a good shape rings true on its own, and lends that same rightness to everything it is part of."},
+ {n:7,name:"Local Symmetries",def:"Many small symmetries among the parts, rather than one great overall symmetry imposed on the whole.",why:"small local symmetries make a robust, forgiving order that can adapt to an irregular world — where one rigid symmetry would shatter."},
+ {n:8,name:"Deep Interlock and Ambiguity",def:"Centers that hook into their surroundings so tightly that it becomes ambiguous where one ends and the next begins.",why:"when parts interlock and share a zone of belonging, they cannot be pulled apart, and the connection between them becomes profound."},
+ {n:9,name:"Contrast",def:"Real opposites — light and dark, solid and void, high and low — that let neighboring centers differentiate and so become truly distinct.",why:"without genuine difference nothing stands out and nothing can be itself; contrast is what lets a center exist at all."},
+ {n:10,name:"Gradients",def:"Qualities that change gradually across space — size, spacing, color — so the structure answers to the differing conditions across it.",why:"living things are never uniform; a gradient lets the form vary exactly as much as its situation demands."},
+ {n:11,name:"Roughness",def:"The looseness and irregularity that comes from solving each part in its own place, rather than from carelessness — the freedom of the working hand.",why:"mechanical exactness kills life; the small unrepeatable irregularities are the very signature of something made whole, by care, in the world."},
+ {n:12,name:"Echoes",def:"Deep similarities of angle and shape running through all the parts — a family resemblance beneath the surface variety.",why:"echoes make the parts kin to one another, so the whole reads as one family with a single character rather than a crowd of strangers."},
+ {n:13,name:"The Void",def:"A great, calm emptiness somewhere near the centre, against which all the intricate detail can exist.",why:"the quiet of the void gives the fullness somewhere to rest; without it, a mass of detail suffocates and no single thing can breathe."},
+ {n:14,name:"Simplicity and Inner Calm",def:"A quality of slowness and quiet — nothing unnecessary, every part doing real work, the whole settled and at rest.",why:"life is not busyness; when everything extraneous is taken away, what remains is pure, and it becomes still enough to feel truly alive."},
+ {n:15,name:"Not-Separateness",def:"The living thing is at one with its world; its edges melt outward and it is never experienced as separate from all that surrounds it.",why:"this is the deepest property — a whole so connected to its surroundings that it and the world are, in the end, continuous. Life reaching past its own edge."},
+];
+const byN={}; PROPS.forEach(p=>byN[p.n]=p);
+
+/* ---- granular controls per property ---- */
+function pct(v){return Math.round(v*100)+"%";}
+const x1=v=>v.toFixed(1)+"×";
+const CONTROLS={
+ 1:[{k:"frames",l:"Nested scales",min:2,max:5,step:1,def:3},{k:"ratio",l:"Scale jump",min:1.2,max:1.9,step:0.05,def:1.4,f:v=>v.toFixed(2)}],
+ 2:[{k:"size",l:"Medallion size",min:0.08,max:0.2,step:0.005,def:0.145,f:pct},{k:"petals",l:"Points",min:6,max:16,step:1,def:12},{k:"layers",l:"Rings",min:1,max:4,step:1,def:3}],
+ 3:[{k:"thick",l:"Border width",min:0.03,max:0.11,step:0.005,def:0.06,f:pct}],
+ 4:[{k:"count",l:"Motif count",min:16,max:56,step:2,def:40}],
+ 5:[{k:"size",l:"Cartouche size",min:0.02,max:0.08,step:0.005,def:0.05,f:pct}],
+ 6:[{k:"round",l:"Roundness",min:0,max:1,step:0.05,def:1,f:pct}],
+ 7:[{k:"order",l:"Symmetry order",min:3,max:8,step:1,def:4},{k:"size",l:"Floret size",min:0.008,max:0.022,step:0.002,def:0.014,f:pct}],
+ 8:[{k:"depth",l:"Interlock depth",min:0.006,max:0.038,step:0.002,def:0.018,f:pct}],
+ 9:[{k:"intensity",l:"Contrast",min:0.3,max:1,step:0.05,def:1,f:pct}],
+ 10:[{k:"strength",l:"Gradient",min:0,max:1,step:0.05,def:0.6,f:pct}],
+ 11:[{k:"amount",l:"Roughness",min:0,max:1,step:0.05,def:0.4,f:pct}],
+ 12:[{k:"echoSize",l:"Echo size",min:0.02,max:0.07,step:0.005,def:0.05,f:pct}],
+ 13:[{k:"radius",l:"Void size",min:1.3,max:2.6,step:0.1,def:1.9,f:x1}],
+ 14:[{k:"calm",l:"Inner calm",min:0,max:1,step:0.05,def:0.55,f:pct}],
+ 15:[{k:"reach",l:"Reach outward",min:0.4,max:2,step:0.1,def:1,f:x1}],
+};
+const norm=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/(b-a)));
+
+/* ---- palettes (personality) ---- */
+const PALETTES={
+ classic:{name:"Madder & Indigo",ground:"#E8DDBF",ink:"#2C2114",fig:"#A6432E",fig2:"#2E4A63",accent:"#B0812C",green:"#6E7B45"},
+ autumn:{name:"Autumn Kilim",ground:"#EBDFC2",ink:"#3A2A18",fig:"#B5502A",fig2:"#7A4A22",accent:"#C99A32",green:"#7E7A38"},
+ rose:{name:"Rose Garden",ground:"#EEE3D3",ink:"#3A2430",fig:"#AA4A63",fig2:"#5E7B5A",accent:"#C79A46",green:"#6E8A63"},
+ verdigris:{name:"Verdigris & Coral",ground:"#E6E3CC",ink:"#1F2E2A",fig:"#2E7D6E",fig2:"#B5603A",accent:"#C0912F",green:"#4E7A52"},
+ indigo:{name:"Indigo Night",ground:"#E3E0CC",ink:"#20263A",fig:"#3B5488",fig2:"#9C3F3A",accent:"#BE9438",green:"#5C7356"},
+ plum:{name:"Plum & Saffron",ground:"#ECE1CB",ink:"#33223A",fig:"#7A4468",fig2:"#417066",accent:"#C88B2E",green:"#6C7C46"},
+};
+
+/* ============ COLOR HELPERS ============ */
+function hexToRgb(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexLerp(a,b,t){t=Math.max(0,Math.min(1,t));const A=hexToRgb(a),B=hexToRgb(b);
+  return`rgb(${Math.round(A[0]+(B[0]-A[0])*t)},${Math.round(A[1]+(B[1]-A[1])*t)},${Math.round(A[2]+(B[2]-A[2])*t)})`;}
+
+/* ============ STATE ============ */
+function defaultProps(){const o={};PROPS.forEach(p=>{const pr={on:false};(CONTROLS[p.n]||[]).forEach(c=>pr[c.k]=c.def);o[p.n]=pr;});return o;}
+let state={palette:"classic",props:defaultProps()};
+function stateFromSpec(spec,palette){const s={palette:palette||state.palette,props:defaultProps()};
+  for(const n in spec){s.props[n].on=true;Object.assign(s.props[n],spec[n]);}return s;}
+function deadState(palette){return{palette:palette||state.palette,props:defaultProps()};}
+
+let selected=1, comparing=false, hasBeenAlive=false;
+
+/* ============ DEGREE OF LIFE — the sophisticated model ============
+   Life is NOT the count of properties. It rewards a strong center,
+   coherence and balance; it PENALISES ornament without rest, and
+   treats roughness as an inverted-U. Emptiness (Void, Inner Calm)
+   is itself a source of life. */
+function presence(pr,n){
+  if(!pr[n].on)return 0; const p=pr[n];
+  switch(n){
+    case 1: return 0.55+0.45*norm(p.frames,2,5);
+    case 2: return 0.35+0.65*norm(p.size,0.08,0.2);
+    case 3: return 0.4+0.6*norm(p.thick,0.03,0.11);
+    case 4: return norm(p.count,16,56);
+    case 5: return 0.55+0.45*norm(p.size,0.02,0.08);
+    case 6: return p.round;
+    case 7: return 0.5+0.5*norm(p.order,3,8);
+    case 8: return norm(p.depth,0.006,0.038);
+    case 9: return p.intensity;
+    case 10: return p.strength;
+    case 11: return p.amount;
+    case 12: return norm(p.echoSize,0.02,0.07);
+    case 13: return norm(p.radius,1.3,2.6);
+    case 14: return p.calm;
+    case 15: return norm(p.reach,0.4,2);
+  } return 1;
+}
+function computeLife(st){
+  const pr=st.props, P=n=>presence(pr,n);
+  const hasHeart=P(2);
+  const groundedness=(P(1)+P(3)+P(5))/3;
+  const differentiation=0.6*P(9)+0.4*P(6);
+  const connectedness=P(15);
+  const rhythm=(P(4)+P(12)+P(7)+P(8)+P(10))/5;          // "ornament" / relational richness
+  const calm=0.62*P(13)+0.38*P(14);                     // rest / emptiness
+  const rough=P(11);
+  const handLife=1-Math.min(1,Math.abs(rough-0.45)/0.6);// inverted-U: some roughness alive, none mechanical, too much messy
+  const rhythmMod=rhythm*(0.35+0.65*calm);              // ornament only pays off when there is rest
+  let base=0.26*hasHeart+0.17*groundedness+0.15*differentiation+0.10*connectedness
+          +0.09*handLife+0.09*calm+0.14*rhythmMod;
+  const overload=Math.max(0,rhythm-(0.35+0.65*calm));   // ornament beyond what calm can hold
+  let life=base*(1-0.55*overload);
+  if(hasHeart<0.15) life*=0.45+hasHeart;                // no heart -> it drifts apart
+  life=Math.max(0,Math.min(1,life));
+  let label="stirring";
+  if(life<0.16) label="lifeless";
+  else if(overload>0.26) label="crowded";
+  else if(life>=0.72) label="alive";
+  else if(life>=0.5) label="coming alive";
+  const count=Object.values(pr).filter(x=>x.on).length;
+  return {life,label,overload,hasHeart,groundedness,differentiation,connectedness,rhythm,calm,handLife,count};
+}
+
+/* ============ CARPET RENDERER ============ */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+function rosette(ctx,x,y,r,petals,inner,smooth,fill,stroke,lw){
+  const steps=petals*2;
+  ctx.beginPath();
+  for(let i=0;i<=steps;i++){
+    const a=i/steps*Math.PI*2-Math.PI/2, rr=(i%2===0)?r:r*inner;
+    const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
+    if(smooth){ if(i===0)ctx.moveTo(px,py);
+      else ctx.quadraticCurveTo(x+Math.cos(a-Math.PI/steps)*r*1.02,y+Math.sin(a-Math.PI/steps)*r*1.02,px,py);
+    } else { i===0?ctx.moveTo(px,py):ctx.lineTo(px,py); }
+  }
+  ctx.closePath();
+  if(fill){ctx.fillStyle=fill;ctx.fill();}
+  if(stroke){ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke();}
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function perimeterPoints(x,y,w,h,count){const per=2*(w+h),pts=[];
+  for(let i=0;i<count;i++){let d=i/count*per,px,py,nx,ny;
+    if(d<w){px=x+d;py=y;nx=0;ny=-1;}else if(d<w+h){py=y+(d-w);px=x+w;nx=1;ny=0;}
+    else if(d<2*w+h){px=x+w-(d-w-h);py=y+h;nx=0;ny=1;}else{py=y+h-(d-2*w-h);px=x;nx=-1;ny=0;}
+    pts.push({x:px,y:py,nx,ny,g:Math.abs(Math.sin(i/count*Math.PI*3))});}
+  return pts;}
+
+function drawCarpet(ctx,W,H,st){
+  const pr=st.props, on=n=>pr[n].on, P=n=>pr[n];
+  const base=PALETTES[st.palette]||PALETTES.classic;
+  const neutral="#a89a7e";
+  const rich=on(9), ti=rich?(0.26+0.74*P(9).intensity):0.12;
+  const col={ ground:base.ground,
+    line: rich? hexLerp("#8c7d61",base.ink,0.4+0.6*P(9).intensity) : "#8c7d61",
+    fig:  hexLerp(neutral,base.fig,ti),  fig2: hexLerp(neutral,base.fig2,ti),
+    accent:hexLerp(neutral,base.accent,ti), green:hexLerp(neutral,base.green,ti) };
+  const S=Math.min(W,H), cx=W/2, cy=H/2;
+  const rng=mulberry32(9871);
+  const rough=on(11)?P(11).amount*S*0.013:0, jj=()=>(rng()*2-1)*rough;
+  const gOn=on(6), inner=gOn?0.42+P(6).round*0.36:0.42, smooth=gOn;
+  const gradS=on(10)?P(10).strength:0;
+  const lw=k=>Math.max(1,S*k);
+
+  ctx.clearRect(0,0,W,H);
+
+  // 15 Not-Separateness — fringe reaching into the world
+  if(on(15)){
+    ctx.save();ctx.strokeStyle=col.line;ctx.globalAlpha=.5;ctx.lineWidth=lw(0.004);
+    const pad=S*0.055, reach=P(15).reach, n=44;
+    for(let i=0;i<n;i++){const t=i/n,len=S*(0.016+rng()*0.02)*reach;
+      [[pad+t*(W-2*pad),pad,0,-1],[pad+t*(W-2*pad),H-pad,0,1],[pad,pad+t*(H-2*pad),-1,0],[W-pad,pad+t*(H-2*pad),1,0]]
+        .forEach(([x,y,dx,dy])=>{ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx*len,y+dy*len);ctx.stroke();});}
+    ctx.restore();
+  }
+
+  // FIELD ground
+  const pad=S*0.06, fx=pad,fy=pad,fw=W-2*pad,fh=H-2*pad;
+  ctx.save();ctx.shadowColor="rgba(40,28,14,.18)";ctx.shadowBlur=S*0.03;ctx.shadowOffsetY=S*0.01;
+  ctx.fillStyle=col.ground;roundRect(ctx,fx,fy,fw,fh,S*0.012);ctx.fill();ctx.restore();
+
+  // 14 Simplicity & Inner Calm — a quieting glaze
+  if(on(14)){const c=P(14).calm;const g=ctx.createRadialGradient(cx,cy,S*0.06,cx,cy,S*0.62);
+    g.addColorStop(0,`rgba(255,247,225,${0.10+0.18*c})`);g.addColorStop(1,`rgba(120,86,40,${0.03+0.06*c})`);
+    ctx.fillStyle=g;roundRect(ctx,fx,fy,fw,fh,S*0.012);ctx.fill();}
+
+  // 1 Levels of Scale — nested frames define the scales
+  const frames=[];
+  if(on(1)){let ins=pad+S*0.026,gap=S*0.05,ratio=P(1).ratio;
+    for(let k=0;k<P(1).frames;k++){frames.push(ins);ins+=gap;gap/=ratio;}}
+  const bthick=on(3)?P(3).thick:0.02;
+  const innerInset=pad+S*(bthick+(on(1)?0.02:0));
+  const ifx=innerInset,ify=innerInset,ifw=W-2*innerInset,ifh=H-2*innerInset;
+
+  // 3 Boundaries — thick ornamented band
+  if(on(3)){
+    ctx.save();ctx.beginPath();
+    roundRect(ctx,fx+S*0.02,fy+S*0.02,fw-S*0.04,fh-S*0.04,S*0.01);
+    roundRect(ctx,ifx,ify,ifw,ifh,S*0.008);
+    ctx.fillStyle=rich?base.fig2:"#b8ab8d";ctx.globalAlpha=rich?0.9:0.6;ctx.fill("evenodd");ctx.restore();
+    // 4 Alternating Repetition
+    if(on(4)){const count=P(4).count, perim=perimeterPoints(fx+S*0.045,fy+S*0.045,fw-S*0.09,fh-S*0.09,count);
+      perim.forEach((pt,i)=>{const r=S*0.016*(0.7+0.5*(1-gradS)+gradS*pt.g);
+        if(i%2===0)rosette(ctx,pt.x+jj(),pt.y+jj(),r,6,inner,smooth,col.accent,col.line,lw(0.0025));
+        else{ctx.beginPath();ctx.moveTo(pt.x,pt.y-r);ctx.lineTo(pt.x+r,pt.y);ctx.lineTo(pt.x,pt.y+r);ctx.lineTo(pt.x-r,pt.y);ctx.closePath();
+          ctx.fillStyle=col.fig;ctx.fill();ctx.lineWidth=lw(0.0022);ctx.strokeStyle=col.line;ctx.stroke();}});}
+  }
+
+  // 8 Deep Interlock — a vine weaving across the boundary
+  if(on(8)){ctx.save();ctx.strokeStyle=col.green;ctx.lineWidth=lw(0.006);ctx.globalAlpha=.9;
+    const depth=P(8).depth*S, pts=perimeterPoints(ifx,ify,ifw,ifh,64);
+    ctx.beginPath();
+    pts.forEach((pt,i)=>{const off=(i%2?1:-1)*depth,x=pt.x+pt.nx*off+jj(),y=pt.y+pt.ny*off+jj();i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath();ctx.stroke();ctx.restore();}
+
+  // 5 Positive Space — convex cartouches
+  if(on(5)){const R=P(5).size*S,mids=[[cx,ify+ifh*0.16],[cx,ify+ifh*0.84],[ifx+ifw*0.16,cy],[ifx+ifw*0.84,cy]];
+    mids.forEach(([x,y],i)=>{const horiz=i>=2;ctx.save();ctx.translate(x,y);if(horiz)ctx.rotate(Math.PI/2);
+      ctx.beginPath();ctx.moveTo(0,-R);ctx.quadraticCurveTo(R*0.7,0,0,R);ctx.quadraticCurveTo(-R*0.7,0,0,-R);ctx.closePath();
+      ctx.fillStyle=col.green;ctx.globalAlpha=.85;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=lw(0.0022);ctx.strokeStyle=col.line;ctx.stroke();ctx.restore();});}
+
+  // 7 Local Symmetries — florets at the inner corners
+  if(on(7)){const order=P(7).order,fs=P(7).size*S;
+    [[ifx+ifw*0.13,ify+ifh*0.13],[ifx+ifw*0.87,ify+ifh*0.13],[ifx+ifw*0.13,ify+ifh*0.87],[ifx+ifw*0.87,ify+ifh*0.87]].forEach(([x,y])=>{
+      for(let k=0;k<order;k++){const a=k/order*Math.PI*2,r=S*0.02;
+        rosette(ctx,x+Math.cos(a)*r+jj(),y+Math.sin(a)*r+jj(),fs,5,inner,smooth,col.fig2,col.line,lw(0.002));}
+      rosette(ctx,x,y,fs*0.9,6,inner,smooth,col.accent,col.line,lw(0.002));});}
+
+  // 12 Echoes — the medallion echoed at the corners
+  const medR=on(2)?P(2).size*S:0;
+  if(on(12)&&on(2)){const es=P(12).echoSize*S;
+    [[ifx+ifw*0.22,ify+ifh*0.22],[ifx+ifw*0.78,ify+ifh*0.22],[ifx+ifw*0.22,ify+ifh*0.78],[ifx+ifw*0.78,ify+ifh*0.78]].forEach(([x,y])=>{
+      rosette(ctx,x,y,es,8,inner,smooth,col.fig,col.line,lw(0.0025));
+      rosette(ctx,x,y,es*0.55,8,inner,smooth,col.accent,col.line,lw(0.002));});}
+
+  // 13 The Void — a calm clear ring around the heart
+  if(on(13)&&on(2)){ctx.beginPath();ctx.arc(cx,cy,medR*P(13).radius,0,Math.PI*2);
+    ctx.fillStyle=col.ground;ctx.fill();ctx.lineWidth=lw(0.0018);ctx.strokeStyle=col.line;ctx.globalAlpha=.32;ctx.stroke();ctx.globalAlpha=1;}
+
+  // 2 Strong Center — the medallion
+  if(on(2)){const petals=P(2).petals,layers=P(2).layers;
+    if(gradS>0){const g=ctx.createRadialGradient(cx,cy,0,cx,cy,medR*1.3);
+      g.addColorStop(0,col.fig);g.addColorStop(1,col.fig2);
+      rosette(ctx,cx,cy,medR*1.12,petals,inner,smooth,null,null,0);ctx.fillStyle=g;ctx.globalAlpha=0.35+0.5*gradS;ctx.fill();ctx.globalAlpha=1;}
+    rosette(ctx,cx+jj(),cy+jj(),medR,petals,inner,smooth,col.fig,col.line,lw(0.004));
+    if(layers>=2)rosette(ctx,cx,cy,medR*0.66,Math.max(6,petals-4),inner,smooth,col.accent,col.line,lw(0.003));
+    if(layers>=3)rosette(ctx,cx,cy,medR*0.38,Math.max(6,petals-6),inner,smooth,col.fig2,col.line,lw(0.0025));
+    if(layers>=4)rosette(ctx,cx,cy,medR*0.2,6,inner,smooth,col.green,col.line,lw(0.002));
+    ctx.beginPath();ctx.arc(cx,cy,medR*0.11,0,Math.PI*2);ctx.fillStyle=col.accent;ctx.fill();
+  } else {
+    ctx.globalAlpha=.22;ctx.strokeStyle=col.line;ctx.lineWidth=1;ctx.strokeRect(cx-S*0.05,cy-S*0.05,S*0.1,S*0.1);ctx.globalAlpha=1;
+  }
+
+  // 1 Levels of Scale — draw frame outlines on top
+  if(on(1)){ctx.strokeStyle=col.line;ctx.globalAlpha=.85;
+    frames.forEach((ins,k)=>{ctx.lineWidth=lw(Math.max(0.001,0.004-k*0.0008));roundRect(ctx,ins,ins,W-2*ins,H-2*ins,S*0.01);ctx.stroke();});
+    ctx.globalAlpha=1;}
+}
+
+/* ============ CANVAS FIT ============ */
+function fit(cnv){const r=cnv.getBoundingClientRect();const dpr=Math.min(2,window.devicePixelRatio||1);
+  const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
+  if(cnv.width!==w)cnv.width=w;if(cnv.height!==h)cnv.height=h;return cnv.getContext("2d");}
+
+let rafPending=false;
+function renderSpecimen(){const c=document.getElementById("specimen");const ctx=fit(c);
+  drawCarpet(ctx,c.width,c.height,comparing?deadState(state.palette):state);}
+function scheduleRender(){if(rafPending)return;rafPending=true;requestAnimationFrame(()=>{rafPending=false;renderSpecimen();renderMeters();});}
+
+/* ============ UI BUILD ============ */
+function buildList(){const el=document.getElementById("flist");el.innerHTML="";
+  PROPS.forEach(p=>{const b=document.createElement("button");
+    b.className="prow"+(state.props[p.n].on?" applied":"")+(selected===p.n?" sel":"");b.dataset.n=p.n;
+    b.innerHTML=`<span class="pn">${String(p.n).padStart(2,"0")}</span><span class="pname">${p.name}</span><span class="pcheck">✓</span>`;
+    b.onclick=()=>{selected=p.n;renderReader();markList();};el.appendChild(b);});}
+function markList(){document.querySelectorAll(".prow").forEach(b=>{const n=+b.dataset.n;
+  b.classList.toggle("applied",state.props[n].on);b.classList.toggle("sel",selected===n);});}
+function buildDots(){const el=document.getElementById("propdots");el.innerHTML="";PROPS.forEach(()=>el.appendChild(document.createElement("i")));}
+function buildPalettes(){const s=document.getElementById("paletteSel");s.innerHTML="";
+  for(const k in PALETTES){const o=document.createElement("option");o.value=k;o.textContent=PALETTES[k].name;s.appendChild(o);}
+  s.value=state.palette;}
+
+function renderMeters(){
+  const L=computeLife(state), pct=Math.round(L.life*100);
+  document.getElementById("lifeFill").style.width=pct+"%";
+  document.getElementById("lifePct").textContent=pct+"%";
+  document.getElementById("propN").textContent=L.count;
+  const lab=document.getElementById("lifeLabel");lab.textContent=L.label;
+  lab.className="lifelabel"+(L.label==="alive"?" alive":(L.label==="crowded"?" crowded":""));
+  document.getElementById("lifebar").classList.toggle("crowded",L.label==="crowded");
+  [...document.getElementById("propdots").children].forEach((d,i)=>d.classList.toggle("lit",state.props[PROPS[i].n].on));
+  const aliveNow=L.life>=0.72;
+  document.getElementById("specimenCard").classList.toggle("alive",aliveNow);
+  if(aliveNow&&!hasBeenAlive){hasBeenAlive=true;showWin();}
+}
+
+function renderReader(){
+  const el=document.getElementById("reader");el.classList.remove("intro");
+  const p=byN[selected],on=state.props[p.n].on;
+  let sliders="";
+  if(on&&CONTROLS[p.n]){sliders=`<div class="adjust"><div class="lbl">Tune this property</div>`+
+    CONTROLS[p.n].map(c=>{const v=state.props[p.n][c.k],f=c.f?c.f(v):(''+v),fill=norm(v,c.min,c.max)*100;
+      return`<div class="slider"><div class="srow"><span>${c.l}</span><span class="sval" data-sv="${p.n}-${c.k}">${f}</span></div>
+        <input type="range" data-ck="${c.k}" data-cf="${c.f?'1':'0'}" min="${c.min}" max="${c.max}" step="${c.step}" value="${v}" style="--fill:${fill}%"></div>`;
+    }).join("")+`</div>`;}
+  el.innerHTML=`
+    <span class="rd-kicker">Property ${String(p.n).padStart(2,"0")} of 15</span>
+    <div class="rd-title">${p.name}</div>
+    <span class="status ${on?"on":"off"}">${on?"◈ present in the specimen":"◌ not yet present"}</span>
+    <div class="rd-sect"><div class="lbl">What it is</div><div class="txt">${p.def}</div></div>
+    <div class="rd-sect why"><div class="lbl">Why it gives life</div><div class="txt">${p.why}</div></div>
+    <div class="rd-sect"><div class="lbl">See its work in the carpet</div>
+      <div class="compare">
+        <div class="cmp without"><canvas data-mini="without"></canvas><span class="cl">Without</span></div>
+        <div class="cmp with"><canvas data-mini="with"></canvas><span class="cl">With №${String(p.n).padStart(2,"0")}</span></div>
+      </div></div>
+    <button class="apply-btn ${on?"remove":"add"}" id="applyBtn">${on?"Remove this property":"Apply to the specimen ↦"}</button>
+    ${sliders}`;
+  // mini demos: a full carpet minus / plus this property, in the current palette
+  const full={}; PROPS.forEach(q=>full[q.n]={});
+  const without=stateFromSpec(full,state.palette); without.props[p.n].on=false;
+  const withS=stateFromSpec(full,state.palette);
+  const ma=el.querySelector('[data-mini="without"]'),mb=el.querySelector('[data-mini="with"]');
+  requestAnimationFrame(()=>{drawCarpet(fit(ma),ma.width,ma.height,without);drawCarpet(fit(mb),mb.width,mb.height,withS);});
+  document.getElementById("applyBtn").onclick=()=>toggle(p.n);
+  el.querySelectorAll('input[type=range]').forEach(inp=>{
+    inp.oninput=()=>{const k=inp.dataset.ck,val=parseFloat(inp.value);state.props[p.n][k]=val;
+      const c=CONTROLS[p.n].find(x=>x.k===k);const sv=el.querySelector(`[data-sv="${p.n}-${k}"]`);
+      if(sv)sv.textContent=c.f?c.f(val):(''+val);
+      inp.style.setProperty("--fill",norm(val,c.min,c.max)*100+"%");
+      scheduleRender();};
+  });
+}
+
+function introHTML(){
+  return `<div class="rd-open">
+    <p class="lead">Alexander's claim is startling: <b>life is not in the eye of the beholder.</b> Faced with two things, people agree — far more than they expect — on which has more life.</p>
+    <p>He traced that agreement to fifteen <b>geometric properties</b>. But here is the subtlety: <b>life is not their sum.</b> A crowded thing, heavy with ornament, is often <em>dead</em>; a plain, quiet thing can be intensely alive. Two of the fifteen — <em>the Void</em> and <em>Inner Calm</em> — are about emptiness itself.</p>
+    <ol>
+      <li><b>Choose a property</b> at left, read it, and <em>apply</em> it — then open its dials and tune it.</li>
+      <li><b>Watch the degree of life.</b> Add ornament without rest and life <em>falls</em>. Find the balance where it rises.</li>
+      <li><b>Train the eye</b> against Alexander's own test — and learn why the busier thing is often the deader one.</li>
+    </ol>
+    <p style="font-style:italic;color:var(--ink-faint)">Select a property to begin.</p>
+  </div>`;
+}
+
+/* ============ ACTIONS ============ */
+function toggle(n){state.props[n].on=!state.props[n].on;if(state.props[n].on)selected=n;
+  renderSpecimen();renderMeters();renderReader();markList();
+  if(state.props[n].on)toast(`Applied <b>${byN[n].name}</b>.`);}
+function applyAll(){PROPS.forEach(p=>state.props[p.n].on=true);renderSpecimen();renderMeters();renderReader();markList();
+  const L=computeLife(state);toast(L.label==="alive"?"All fifteen present — and balanced.":"All fifteen present — yet only <b>"+Math.round(L.life*100)+"% alive.</b> More is not the same as alive.");}
+function clearAll(){state.props=defaultProps();hasBeenAlive=false;
+  renderSpecimen();renderMeters();renderReader();markList();toast("Back to a lifeless field.");}
+function surprise(){
+  const keys=Object.keys(PALETTES);state.palette=keys[Math.floor(Math.random()*keys.length)];
+  document.getElementById("paletteSel").value=state.palette;
+  PROPS.forEach(p=>{const pr=state.props[p.n];pr.on=Math.random()<0.7;
+    (CONTROLS[p.n]||[]).forEach(c=>{const steps=Math.round((c.max-c.min)/c.step);pr[c.k]=+(c.min+Math.round(Math.random()*steps)*c.step).toFixed(4);});});
+  state.props[2].on=true; // ensure a heart
+  hasBeenAlive=computeLife(state).life>=0.72;
+  renderSpecimen();renderMeters();renderReader();markList();
+  const L=computeLife(state);toast(`A new specimen — <b>${L.label}</b>, ${Math.round(L.life*100)}% alive.`);}
+
+/* ============ TRAIN THE EYE ============ */
+let tScore=0,tTotal=0,tStreak=0,tRound=null,tAnswered=false;
+function rand(a,b){return a+Math.random()*(b-a);}
+function pickN(arr,n){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,n);}
+// recipes produce states with genuine character; correctness is decided by computeLife, never by count
+function makeState(recipe,palette){
+  const spec={};const set=(n,o={})=>spec[n]=o;
+  const ORN=[4,7,8,10,12];
+  if(recipe==="busy"){ // lots of ornament, no rest -> low life, high count
+    set(2,{size:rand(0.12,0.18),petals:Math.round(rand(8,16)),layers:3});set(3,{thick:rand(0.06,0.1)});set(9,{intensity:rand(0.8,1)});
+    ORN.forEach(n=>set(n,{}));set(6,{round:rand(0,0.4)});set(11,{amount:rand(0.7,1)});
+    // deliberately omit 13 & 14 (no void / no calm)
+    Object.keys(spec).forEach(n=>{CONTROLS[n].forEach(c=>{if(spec[n][c.k]===undefined)spec[n][c.k]=c.def;});});
+  }else if(recipe==="serene"){ // restrained, calm, a real heart -> high life, low count
+    set(2,{size:rand(0.11,0.16),petals:Math.round(rand(8,12)),layers:2});set(3,{thick:rand(0.05,0.08)});
+    set(5,{});set(6,{round:rand(0.7,1)});set(9,{intensity:rand(0.55,0.85)});
+    set(13,{radius:rand(1.9,2.5)});set(14,{calm:rand(0.6,0.95)});set(15,{reach:rand(0.9,1.6)});set(1,{frames:Math.round(rand(2,3))});
+    if(Math.random()<0.5)set(12,{echoSize:rand(0.03,0.05)});
+    Object.keys(spec).forEach(n=>{CONTROLS[n].forEach(c=>{if(spec[n][c.k]===undefined)spec[n][c.k]=c.def;});});
+  }else if(recipe==="rich"){ // maximal BUT balanced with calm -> high life, high count
+    PROPS.forEach(p=>set(p.n,{}));set(13,{radius:rand(1.9,2.4)});set(14,{calm:rand(0.6,0.9)});set(11,{amount:rand(0.3,0.55)});set(9,{intensity:rand(0.8,1)});
+    Object.keys(spec).forEach(n=>{CONTROLS[n].forEach(c=>{if(spec[n][c.k]===undefined)spec[n][c.k]=c.def;});});
+  }else{ // sparse / weak -> low life, low count (sometimes no heart)
+    if(Math.random()<0.6)set(2,{size:rand(0.09,0.13),layers:1});
+    pickN([1,3,5,9],2).forEach(n=>set(n,{}));
+    if(Math.random()<0.4)set(11,{amount:rand(0.8,1)});
+    Object.keys(spec).forEach(n=>{CONTROLS[n].forEach(c=>{if(spec[n][c.k]===undefined)spec[n][c.k]=c.def;});});
+  }
+  return stateFromSpec(spec,palette);
+}
+const PAIRS=[["busy","serene"],["busy","serene"],["rich","busy"],["sparse","serene"],["rich","sparse"],["busy","rich"],["serene","sparse"]];
+function newRound(){
+  tAnswered=false;
+  const pal=Object.keys(PALETTES)[Math.floor(Math.random()*Object.keys(PALETTES).length)];
+  let A,B,lifeA,lifeB,tries=0;
+  do{ const pair=PAIRS[Math.floor(Math.random()*PAIRS.length)];
+      const r=Math.random()<0.5?pair:[pair[1],pair[0]];
+      A=makeState(r[0],pal);B=makeState(r[1],pal);
+      lifeA=computeLife(A);lifeB=computeLife(B);tries++;
+  }while(Math.abs(lifeA.life-lifeB.life)<0.1&&tries<12);
+  tRound={states:[A,B],lives:[lifeA,lifeB],strongIdx:lifeA.life>=lifeB.life?0:1};
+  document.querySelectorAll(".spec-choice").forEach((sc,i)=>{sc.className="spec-choice";
+    const c=sc.querySelector("canvas");requestAnimationFrame(()=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));});
+  document.getElementById("trainBody").innerHTML=`<p style="color:var(--ink-soft);font-style:italic">Look at each, and ask which one you would rather be — which is the truer picture of your own self, whole and at ease. That one has more life. It is not always the busier one.</p>`;
+  document.querySelectorAll(".choose-btn").forEach(b=>b.disabled=false);
+  updateTrainScore();
+}
+function reasonFor(win,lose){
+  const parts=[];
+  if(lose.overload-win.overload>0.14) parts.push(`The busier one piles on ornament with <b>too little rest</b> — and in Alexander's world that crowding <b>drains</b> life. The calmer one, with room to breathe, holds more.`);
+  else if(win.hasHeart-lose.hasHeart>0.22) parts.push(`A <b>strong center</b> gives the living one a heart to gather around; the other drifts apart into unrelated parts.`);
+  else if(win.calm-lose.calm>0.2) parts.push(`<b>The void and inner calm</b> — emptiness itself — give the quieter one more life than the restless one.`);
+  else if(win.differentiation-lose.differentiation>0.2) parts.push(`Real <b>contrast and good shape</b> let its centers become distinct and truly present.`);
+  else if(win.groundedness-lose.groundedness>0.2) parts.push(`A <b>well-formed field</b> — boundary and positive space — makes it whole where the other stays loose.`);
+  else parts.push(`It <b>balances its parts</b> better — every property in service of the whole, none shouting over the rest.`);
+  return parts.join(" ");
+}
+function choose(i){
+  if(tAnswered)return;tAnswered=true;
+  const correct=i===tRound.strongIdx;tTotal++;if(correct){tScore++;tStreak++;}else tStreak=0;
+  document.querySelectorAll(".spec-choice").forEach((sc,idx)=>{sc.classList.add(idx===tRound.strongIdx?"win":"lose");if(idx===i)sc.classList.add("pick");});
+  document.querySelectorAll(".choose-btn").forEach(b=>b.disabled=true);
+  const win=tRound.lives[tRound.strongIdx],lose=tRound.lives[1-tRound.strongIdx];
+  const wPct=Math.round(win.life*100),lPct=Math.round(lose.life*100);
+  const countNote = win.count<lose.count
+    ? `<div class="kicker-note"><b>Notice:</b> the more living one has <b>fewer</b> properties (${win.count}, not ${lose.count}). Life is not complexity — it is wholeness.</div>` : "";
+  document.getElementById("trainBody").innerHTML=`
+    <div class="verdict ${correct?"right":"wrong"}">${correct?"✓ You felt it.":"✕ The other one has more life."}</div>
+    <h3>Degree of life</h3>
+    <div class="lifecmp">
+      <div class="lc hi"><span>Living</span><div class="bar"><span style="width:${wPct}%"></span></div><span class="n">${wPct}%</span></div>
+      <div class="lc lo"><span>Less</span><div class="bar"><span style="width:${lPct}%"></span></div><span class="n">${lPct}%</span></div>
+    </div>
+    <p class="reason">${reasonFor(win,lose)}</p>
+    ${countNote}
+    <button class="next-btn show" id="nextRound">Next pair ↦</button>`;
+  document.getElementById("nextRound").onclick=newRound;
+  updateTrainScore();
+}
+function updateTrainScore(){document.getElementById("trainScore").textContent=`${tScore} / ${tTotal} · streak ${tStreak}`;}
+
+/* ============ TABS ============ */
+function setTab(t){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  document.getElementById("studyWrap").style.display=t==="study"?"":"none";
+  document.getElementById("trainWrap").classList.toggle("on",t==="train");
+  if(t==="study"){renderSpecimen();renderReader();}
+  if(t==="train"){if(!tRound)newRound();else document.querySelectorAll(".spec-choice canvas").forEach((c,i)=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));}
+}
+
+/* ============ TOAST / OVERLAY ============ */
+let toastT;function toast(m){const t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2800);}
+function openOverlay(){document.getElementById("overlay").classList.add("show");}
+function closeOverlay(){document.getElementById("overlay").classList.remove("show");}
+function showHow(){const m=document.getElementById("modal");m.className="modal";
+  m.innerHTML=`<p class="eyebrow">How to play</p><h2>Compose a living whole — then learn to see it.</h2>
+    <ol>
+      <li><b>Compose life.</b> Pick a property, read what it is and why it gives life, <em>apply</em> it, then open its dials to tune size, count, roundness, contrast, roughness and more. The two small panels isolate that one property's contribution.</li>
+      <li><b>Life is a balance, not a total.</b> The degree-of-life meter is real: pile on ornament with no <em>void</em> and no <em>calm</em>, and watch life turn to <span style="color:var(--clay)">crowded</span>. Applying all fifteen does <em>not</em> guarantee the most alive result — finding the balance does.</li>
+      <li><b>Train the eye.</b> Shown two carpets, choose the one with more life. Often it is the simpler one — the reveal shows the real degree of life of each, and why. Sometimes the deader carpet is the one with more properties.</li>
+    </ol>
+    <p style="font-style:italic">The carpet is Alexander's own favourite example of living structure — a field of centers, each helping the others come alive.</p>
+    <button class="start" id="closeHow">Begin</button>`;
+  openOverlay();document.getElementById("closeHow").onclick=closeOverlay;}
+function showWin(){const m=document.getElementById("modal");m.className="modal win";const L=computeLife(state);
+  m.innerHTML=`<div class="bloom">❧ ✦ ❧</div><p class="eyebrow" style="text-align:center">The phenomenon of life</p>
+    <h2 style="text-align:center">It has come alive.</h2>
+    <p style="text-align:center">You reached <b>${Math.round(L.life*100)}% life</b> — not by adding everything, but by letting the whole breathe. Each center now helps the others. This is what Alexander means by <b>wholeness</b>.</p>
+    <p style="text-align:center;font-style:italic;color:var(--ink-faint)">“The degree of life is a real, objective quality of things — and it is the same as the degree to which they are a picture of the self.”</p>
+    <button class="start" id="closeWin">Contemplate it</button>`;
+  openOverlay();document.getElementById("closeWin").onclick=closeOverlay;}
+
+/* ============ THEME ============ */
+function toggleTheme(){const root=document.documentElement;const cur=root.getAttribute("data-theme");
+  const sysDark=matchMedia("(prefers-color-scheme:dark)").matches;const now=cur||(sysDark?"dark":"light");
+  root.setAttribute("data-theme",now==="dark"?"light":"dark");}
+
+/* ============ WIRING ============ */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+document.getElementById("howBtn").onclick=showHow;
+document.getElementById("themeBtn").onclick=toggleTheme;
+document.getElementById("allBtn2").onclick=applyAll;
+document.getElementById("clearBtn").onclick=clearAll;
+document.getElementById("surpriseBtn").onclick=surprise;
+document.getElementById("paletteSel").onchange=e=>{state.palette=e.target.value;renderSpecimen();renderReader();};
+const cmpBtn=document.getElementById("compareBtn");
+const startCmp=e=>{e.preventDefault();comparing=true;renderSpecimen();};
+const endCmp=()=>{if(comparing){comparing=false;renderSpecimen();}};
+cmpBtn.addEventListener("mousedown",startCmp);cmpBtn.addEventListener("touchstart",startCmp,{passive:false});
+["mouseup","mouseleave","touchend","touchcancel"].forEach(ev=>cmpBtn.addEventListener(ev,endCmp));
+document.querySelectorAll("[data-choose]").forEach(b=>b.onclick=()=>choose(+b.dataset.choose));
+document.querySelectorAll(".spec-choice canvas").forEach(c=>c.onclick=()=>{if(!tAnswered)choose(+c.dataset.c);});
+document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeOverlay();};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOverlay();});
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{renderSpecimen();if(selected)renderReader();
+  if(tRound&&document.getElementById("trainWrap").classList.contains("on"))
+    document.querySelectorAll(".spec-choice canvas").forEach((c,i)=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));},140);});
+
+/* ============ INIT ============ */
+function init(){
+  buildList();buildDots();buildPalettes();
+  document.getElementById("reader").innerHTML=introHTML();
+  document.getElementById("reader").classList.add("intro");
+  renderMeters();
+  requestAnimationFrame(()=>{renderSpecimen();selected=1;renderReader();markList();});
+  showHow();
+}
+init();
+</script>
