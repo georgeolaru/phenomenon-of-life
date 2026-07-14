@@ -20,11 +20,24 @@ Just open the file in a browser:
 open phenomenon-of-life.html
 ```
 
-## Published artifact (shareable link)
-Live at: https://claude.ai/code/artifact/0fee8dcb-bc01-4e4c-933e-ca23c568f313
+## Live public site (GitHub Pages)
+**https://georgeolaru.github.io/phenomenon-of-life/** — open with no login, on any device.
 
-The link is private to the owner's Claude account until shared from the page's
-share menu. Browse all your artifacts at https://claude.ai/code/artifacts
+Served from `index.html` on the `master` branch (repo is public). `index.html`
+is `phenomenon-of-life.html` with a `<!doctype html>` line prepended (standards
+mode). **When you change the game, regenerate it:**
+```
+printf '<!doctype html>\n' | cat - phenomenon-of-life.html > index.html
+git add -A && git commit -m "update" && git push
+```
+Pages rebuilds in ~1 minute.
+
+## Published artifact (private link)
+Also at: https://claude.ai/code/artifact/0fee8dcb-bc01-4e4c-933e-ca23c568f313
+Private to the owner's Claude account until shared from the page's share menu.
+Keep `phenomenon-of-life.html` free of `<!doctype>`/`<html>`/`<head>`/`<body>`
+tags — the artifact host adds them at publish time. Browse yours at
+https://claude.ai/code/artifacts
 
 ## How to continue in a future Claude Code session
 1. Open a Claude Code session in this folder.
