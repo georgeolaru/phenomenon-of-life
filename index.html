@@ -1,0 +1,1018 @@
+<title>The Phenomenon of Life — The Fifteen Properties</title>
+<style>
+  /* ============ TOKENS ============ */
+  :root{
+    --paper:#E4DBC6; --panel:#EDE6D5; --panel-2:#E7DFCC;
+    --ink:#2C2620; --ink-soft:#6C6353; --ink-faint:#938872;
+    --line:rgba(44,38,32,.15); --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346; --life-bright:#7B9A4E; --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C; --gold:#A9812B; --shadow:rgba(52,44,32,.16);
+    --radius:10px;
+    --serif:"Hoefler Text","Iowan Old Style",Palatino,"Palatino Linotype",Georgia,"Times New Roman",serif;
+    --mono:ui-monospace,"SF Mono","JetBrains Mono",Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --paper:#171511; --panel:#201C16; --panel-2:#251F17;
+      --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+      --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+      --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+      --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --paper:#E4DBC6; --panel:#EDE6D5; --panel-2:#E7DFCC;
+    --ink:#2C2620; --ink-soft:#6C6353; --ink-faint:#938872;
+    --line:rgba(44,38,32,.15); --line-strong:rgba(44,38,32,.28);
+    --life:#5E7346; --life-bright:#7B9A4E; --life-glow:rgba(123,154,78,.35);
+    --clay:#A75A3C; --gold:#A9812B; --shadow:rgba(52,44,32,.16);
+  }
+  :root[data-theme="dark"]{
+    --paper:#171511; --panel:#201C16; --panel-2:#251F17;
+    --ink:#EAE1CB; --ink-soft:#A79D85; --ink-faint:#786F5C;
+    --line:rgba(234,225,203,.13); --line-strong:rgba(234,225,203,.24);
+    --life:#8FAC5F; --life-bright:#AECA72; --life-glow:rgba(174,202,114,.28);
+    --clay:#C9784E; --gold:#D2A544; --shadow:rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background-image:radial-gradient(circle at 18% 10%,rgba(255,255,255,.05),transparent 45%),
+      radial-gradient(circle at 84% 92%,rgba(0,0,0,.04),transparent 55%);}
+  .mono{font-family:var(--mono)}
+  button{font-family:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--life-bright);outline-offset:2px;border-radius:4px}
+
+  /* ============ MOBILE-FIRST SHELL ============ */
+  .app{max-width:1400px;margin:0 auto;min-height:100dvh;display:flex;flex-direction:column;padding:12px;gap:14px}
+
+  header.top{display:flex;flex-direction:column;gap:12px;border-bottom:1.5px solid var(--line-strong);padding-bottom:12px}
+  .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);margin:0 0 5px}
+  h1.title{font-weight:600;font-size:clamp(1.7rem,7vw,2.9rem);line-height:.98;margin:0;letter-spacing:-.02em;text-wrap:balance}
+  h1.title em{font-style:italic;color:var(--life)}
+  .subtitle{color:var(--ink-soft);font-size:.9rem;margin:.5rem 0 0;max-width:58ch;font-style:italic}
+  .head-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;background:transparent;
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:9px 13px;border-radius:99px;transition:.18s}
+  .btn:hover{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+
+  .tabs{display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px;
+    width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .tabs::-webkit-scrollbar{display:none}
+  .tab{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:transparent;border:none;
+    color:var(--ink-soft);padding:9px 14px;border-radius:99px;transition:.18s;white-space:nowrap;flex:1 0 auto}
+  .tab.on{background:var(--life);color:#fff}
+  :root[data-theme="dark"] .tab.on{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .tab.on{color:#14130e}}
+
+  .commission{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--radius);padding:12px 16px;box-shadow:0 1px 0 var(--shadow)}
+  .commission .goal{flex:1 1 240px;min-width:200px}
+  .commission .goal .glabel{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--clay);display:block;margin-bottom:2px}
+  .meters{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+  .meter{min-width:150px;flex:1 1 150px}
+  .meter .mlabel{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);
+    display:flex;justify-content:space-between;gap:10px;margin-bottom:5px;align-items:center}
+  .meter .mval{color:var(--ink);font-variant-numeric:tabular-nums}
+  .lifebar{height:7px;border-radius:99px;background:var(--line);overflow:hidden}
+  .lifebar>span{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--life),var(--life-bright));
+    box-shadow:0 0 10px var(--life-glow);transition:width .5s cubic-bezier(.22,1,.36,1)}
+  .lifebar.crowded>span{background:linear-gradient(90deg,var(--clay),#c58a4e);box-shadow:0 0 10px rgba(167,90,60,.4)}
+  .lifelabel{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--line);color:var(--ink-soft)}
+  .lifelabel.alive{background:var(--life-glow);color:var(--life)}
+  .lifelabel.crowded{background:color-mix(in srgb,var(--clay) 18%,transparent);color:var(--clay)}
+  .propdots{display:flex;gap:4px;flex-wrap:wrap}
+  .propdots i{width:11px;height:11px;border-radius:3px;background:var(--line);border:1px solid var(--line-strong);transition:.3s}
+  .propdots i.lit{background:var(--life);border-color:transparent;box-shadow:0 0 6px var(--life-glow)}
+
+  /* mobile: everything stacks and the page scrolls */
+  .work{display:flex;flex-direction:column;gap:14px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 1px 0 var(--shadow);
+    display:flex;flex-direction:column;overflow:hidden}
+  .card-h{font-family:var(--mono);font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);
+    padding:13px 16px 10px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+
+  /* the fifteen list */
+  .flist{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:5px;max-height:44vh}
+  .prow{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;width:100%;text-align:left;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px;padding:10px 11px;transition:.15s}
+  .prow:hover{border-color:var(--life);background:var(--life-glow)}
+  .prow.sel{border-color:var(--life);box-shadow:inset 0 0 0 1px var(--life)}
+  .prow .pn{font-family:var(--mono);font-size:11px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+  .prow.applied .pn{color:var(--life)}
+  .pname{font-size:.88rem;font-weight:600;line-height:1.05}
+  .pcheck{width:20px;height:20px;border-radius:50%;border:1.6px solid var(--line-strong);display:grid;place-items:center;font-size:11px;color:transparent;transition:.2s}
+  .prow.applied .pcheck{background:var(--life);border-color:var(--life);color:#fff}
+  :root[data-theme="dark"] .prow.applied .pcheck{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .prow.applied .pcheck{color:#14130e}}
+
+  /* specimen */
+  .specimen .card-h .alive{color:var(--life);opacity:0;transition:.4s;font-weight:600}
+  .specimen.alive .card-h .alive{opacity:1}
+  .canvaswrap{display:grid;place-items:center;padding:clamp(10px,3vw,26px)}
+  .canvasframe{position:relative;width:min(100%,70vh);aspect-ratio:1/1}
+  #specimen{width:100%;height:100%;display:block;border-radius:4px}
+  .controls{display:flex;gap:8px;padding:12px 14px;border-top:1px solid var(--line);flex-wrap:wrap;justify-content:center;align-items:center}
+  .ctrl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--panel-2);
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:10px 14px;border-radius:8px;transition:.16s}
+  .ctrl:hover,.ctrl.act{border-color:var(--life);color:var(--life)}
+  .ctrl.primary{background:var(--life);border-color:var(--life);color:#fff}
+  :root[data-theme="dark"] .ctrl.primary{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ctrl.primary{color:#14130e}}
+  .ctrl.primary:hover{background:var(--life-bright)}
+  select.ctrl{appearance:none;-webkit-appearance:none;padding-right:26px;
+    background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);
+    background-position:calc(100% - 14px) 52%,calc(100% - 9px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+
+  /* reader */
+  .reader{padding:16px 18px}
+  .reader.intro .rd-open{display:block}
+  .rd-open{color:var(--ink-soft)}
+  .rd-open p{margin:.2rem 0 1rem}
+  .rd-open .lead{font-size:1.02rem;color:var(--ink)}
+  .rd-open ol{margin:0;padding-left:1.15rem}
+  .rd-open li{margin-bottom:.7rem}
+  .rd-open li b{color:var(--ink);font-weight:600}
+  .rd-kicker{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--life);display:inline-flex;align-items:center;gap:7px}
+  .rd-kicker::before{content:"";width:9px;height:9px;border-radius:2px;background:var(--life)}
+  .rd-title{font-size:1.5rem;font-weight:600;line-height:1.04;margin:.15rem 0 .1rem;text-wrap:balance;letter-spacing:-.01em}
+  .status{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:5px 10px;border-radius:99px;margin-top:8px}
+  .status.on{background:var(--life-glow);color:var(--life)}
+  .status.off{background:color-mix(in srgb,var(--clay) 15%,transparent);color:var(--clay)}
+  .rd-sect{margin-top:1rem}
+  .rd-sect .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .rd-sect .txt{line-height:1.5}
+  .rd-sect.why .txt::before{content:"Why it gives life — ";font-style:italic;color:var(--life);font-weight:600}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .cmp{display:flex;flex-direction:column;gap:5px}
+  .cmp canvas{width:100%;aspect-ratio:1/1;border:1px solid var(--line);border-radius:6px;display:block}
+  .cmp .cl{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;text-align:center}
+  .cmp.without .cl{color:var(--clay)}
+  .cmp.with .cl{color:var(--life)}
+  .apply-btn{display:block;width:100%;margin-top:16px;padding:14px;border-radius:8px;border:none;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;transition:.18s}
+  .apply-btn.add{background:var(--life);color:#fff;box-shadow:0 3px 12px var(--life-glow)}
+  .apply-btn.remove{background:transparent;color:var(--clay);border:1px solid var(--clay)}
+  :root[data-theme="dark"] .apply-btn.add{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .apply-btn.add{color:#14130e}}
+  .apply-btn.add:hover{background:var(--life-bright)}
+  .apply-btn.remove:hover{background:color-mix(in srgb,var(--clay) 12%,transparent)}
+  .adjust{margin-top:16px;border-top:1px dashed var(--line-strong);padding-top:14px}
+  .adjust>.lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+  .adjust>.lbl::before{content:"◇";color:var(--life)}
+  .slider{margin-bottom:14px}
+  .slider .srow{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+  .slider .srow .sval{color:var(--life);font-variant-numeric:tabular-nums}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:5px;border-radius:99px;
+    background:linear-gradient(90deg,var(--life) var(--fill,50%),var(--line-strong) var(--fill,50%));outline:none;margin:0}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:var(--life);cursor:pointer;border:2px solid var(--panel);box-shadow:0 1px 3px var(--shadow)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--life);cursor:pointer;border:2px solid var(--panel)}
+
+  /* ============ TRAIN ============ */
+  .train{display:none;flex-direction:column;gap:14px}
+  .train.on{display:flex}
+  .arena{overflow:hidden}
+  .duel{display:grid;grid-template-columns:1fr 1fr;gap:clamp(8px,2vw,26px);padding:clamp(10px,2.4vw,28px);place-items:center}
+  .spec-choice{width:100%;display:flex;flex-direction:column;gap:9px;align-items:center}
+  .spec-choice canvas{width:100%;aspect-ratio:1/1;border:2px solid var(--line);border-radius:6px;display:block;transition:.18s;cursor:pointer}
+  .spec-choice.pick canvas{border-color:var(--life);box-shadow:0 0 0 3px var(--life-glow)}
+  .spec-choice.win canvas{border-color:var(--life)}
+  .spec-choice.lose canvas{border-color:var(--clay);opacity:.72}
+  .choose-btn{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;background:var(--panel-2);
+    border:1px solid var(--line-strong);color:var(--ink-soft);padding:10px 16px;border-radius:99px;transition:.16s;width:100%;max-width:240px}
+  .choose-btn:hover{border-color:var(--life);color:var(--life);background:var(--life-glow)}
+  .duel-q{text-align:center;font-style:italic;color:var(--ink-soft);padding:14px 16px 0;font-size:.92rem}
+  .train-body{padding:16px 18px}
+  .train-body h3{font-size:1.15rem;margin:.3rem 0 .4rem;font-weight:600;line-height:1.1}
+  .verdict{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-radius:8px;margin:2px 0 12px}
+  .verdict.right{background:var(--life-glow);color:var(--life)}
+  .verdict.wrong{background:color-mix(in srgb,var(--clay) 16%,transparent);color:var(--clay)}
+  .lifecmp{display:flex;flex-direction:column;gap:9px;margin:10px 0}
+  .lifecmp .lc{display:grid;grid-template-columns:64px 1fr auto;gap:9px;align-items:center;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+  .lifecmp .lc .bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+  .lifecmp .lc .bar>span{display:block;height:100%;border-radius:99px}
+  .lifecmp .lc.hi .bar>span{background:linear-gradient(90deg,var(--life),var(--life-bright))}
+  .lifecmp .lc.lo .bar>span{background:linear-gradient(90deg,var(--clay),#c58a4e)}
+  .lifecmp .lc .n{color:var(--ink);font-variant-numeric:tabular-nums}
+  .reason{color:var(--ink-soft);line-height:1.5;margin:6px 0}
+  .reason b{color:var(--ink)}
+  .kicker-note{background:color-mix(in srgb,var(--gold) 14%,transparent);border-left:3px solid var(--gold);padding:8px 12px;border-radius:0 6px 6px 0;font-size:.86rem;color:var(--ink-soft);margin-top:10px}
+  .kicker-note b{color:var(--gold)}
+  .next-btn{display:none;width:100%;margin-top:16px;padding:14px;border:none;border-radius:8px;background:var(--life);color:#fff;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600}
+  :root[data-theme="dark"] .next-btn{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .next-btn{color:#14130e}}
+  .next-btn.show{display:block}
+  .next-btn:hover{background:var(--life-bright)}
+
+  /* ============ FAMILY WALL ============ */
+  .wall{display:none;flex-direction:column;gap:14px}
+  .wall.on{display:flex}
+  .wp-list{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:5px;max-height:40vh}
+  .wprow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;text-align:left;background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px;padding:10px 11px;transition:.15s;border-left:3px solid var(--line-strong)}
+  .wprow:hover{border-color:var(--life);background:var(--life-glow)}
+  .wprow.sel{box-shadow:inset 0 0 0 1px var(--life)}
+  .wprow.good{border-left-color:var(--life)} .wprow.mid{border-left-color:var(--gold)} .wprow.bad{border-left-color:var(--clay)}
+  .wprow .wpn{font-size:.85rem;font-weight:600;line-height:1.08}
+  .wprow .wpsub{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+  .wprow .wsc{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
+  .wprow.good .wsc{color:var(--life)} .wprow.mid .wsc{color:var(--gold)} .wprow.bad .wsc{color:var(--clay)}
+  .wall-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--line);color:var(--ink-soft)}
+  .wall-tag.alive{background:var(--life-glow);color:var(--life)}
+  .wall-stage-wrap{display:grid;place-items:center;padding:clamp(10px,3vw,22px)}
+  .wall-stage{position:relative;width:min(100%,calc(74vh * 4 / 3));aspect-ratio:4/3;border-radius:4px;overflow:hidden;
+    background:linear-gradient(178deg,color-mix(in srgb,var(--panel-2) 82%,#fff),var(--panel-2));
+    box-shadow:inset 0 0 70px rgba(0,0,0,.06),0 1px 0 var(--shadow);border:1px solid var(--line);
+    touch-action:none;user-select:none;-webkit-user-select:none}
+  .wall-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9%;
+    background:color-mix(in srgb,var(--ink) 8%,transparent);border-top:1px solid var(--line)}
+  .console{position:absolute;left:27%;width:46%;bottom:2%;height:15%;border-radius:4px 4px 3px 3px;z-index:1;
+    background:linear-gradient(180deg,#9a774d,#6f5232);box-shadow:0 8px 16px rgba(40,25,10,.28)}
+  .console::before{content:"";position:absolute;left:8%;right:8%;top:26%;height:1.5px;background:rgba(0,0,0,.22)}
+  .frame{position:absolute;z-index:2;cursor:grab;background:#f3ecda;border-style:solid;border-color:#6a5030;
+    box-shadow:0 6px 16px rgba(30,20,8,.28);transition:box-shadow .12s,transform .12s;touch-action:none}
+  .frame:active{cursor:grabbing}
+  .frame.drag{box-shadow:0 12px 26px rgba(30,20,8,.4);z-index:6}
+  .frame .pcv{position:absolute;inset:0;width:100%;height:100%;display:block;background:#e7dcc0}
+  .frame .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
+  .frame.has-photo .pcv{display:none}
+  .frame.has-photo .pimg{display:block}
+  .frame .plate{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
+    text-align:center;color:#f3ecda;background:linear-gradient(180deg,transparent,rgba(20,12,4,.62));padding:8px 2px 3px;outline:none}
+  .frame .plate:focus{background:linear-gradient(180deg,transparent,rgba(20,12,4,.8))}
+  .frame .upl{position:absolute;top:3px;right:3px;width:22px;height:22px;border-radius:50%;border:none;background:rgba(20,12,4,.5);color:#f3ecda;
+    font-size:12px;line-height:1;opacity:0;transition:.15s;display:grid;place-items:center;padding:0}
+  .frame:hover .upl,.frame.drag .upl{opacity:1}
+  .guide{position:absolute;background:var(--life-bright);opacity:.7;z-index:5;pointer-events:none;display:none}
+  .guide.v{width:1.5px;top:0;bottom:0} .guide.h{height:1.5px;left:0;right:0}
+  .guide.show{display:block}
+  .wall-reading{padding:16px 18px}
+  .wall-reading .top-tip{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:11px 13px;margin:12px 0;line-height:1.45}
+  .wall-reading .top-tip .lbl{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:3px}
+  .wall-reading.at-home .top-tip{border-left-color:var(--life)} .wall-reading.at-home .top-tip .lbl{color:var(--life)}
+  .wr-open{color:var(--ink-soft)} .wr-open p{margin:.2rem 0 .9rem} .wr-open .lead{color:var(--ink);font-size:1.02rem}
+  .wp-detail{margin-top:14px;border-top:1px dashed var(--line-strong);padding-top:12px}
+  .wp-detail .lbl{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:3px}
+  .wp-detail h4{margin:.1rem 0 .3rem;font-size:1.05rem;font-weight:600}
+  .wp-detail p{margin:.2rem 0;color:var(--ink-soft);line-height:1.5}
+
+  /* toast / overlay */
+  .toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--paper);
+    padding:12px 18px;border-radius:99px;font-size:.88rem;box-shadow:0 8px 30px var(--shadow);opacity:0;pointer-events:none;
+    transition:.35s cubic-bezier(.22,1,.36,1);z-index:60;max-width:92vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast b{color:var(--life-bright)}
+  .overlay{position:fixed;inset:0;background:color-mix(in srgb,var(--ink) 55%,transparent);display:grid;place-items:center;padding:16px;z-index:80;
+    opacity:0;pointer-events:none;transition:.3s;backdrop-filter:blur(3px)}
+  .overlay.show{opacity:1;pointer-events:auto}
+  .modal{background:var(--panel);border:1px solid var(--line-strong);border-radius:16px;max-width:600px;width:100%;padding:clamp(20px,5vw,38px);
+    box-shadow:0 24px 70px var(--shadow);transform:translateY(12px) scale(.98);transition:.35s cubic-bezier(.22,1,.36,1);max-height:88dvh;overflow:auto}
+  .overlay.show .modal{transform:none}
+  .modal .eyebrow{color:var(--life)}
+  .modal h2{font-size:clamp(1.4rem,5vw,2.1rem);margin:.1rem 0 .5rem;font-weight:600;line-height:1.02;text-wrap:balance;letter-spacing:-.01em}
+  .modal p{color:var(--ink-soft);margin:.4rem 0}
+  .modal ol{color:var(--ink-soft);padding-left:1.15rem;margin:1rem 0}
+  .modal ol li{margin-bottom:.7rem}
+  .modal ol li b{color:var(--ink);font-weight:600}
+  .modal .start{margin-top:14px;width:100%;padding:15px;border:none;border-radius:9px;background:var(--life);color:#fff;font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:600;transition:.18s}
+  :root[data-theme="dark"] .modal .start{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .modal .start{color:#14130e}}
+  .modal .start:hover{background:var(--life-bright)}
+  .modal.win .bloom{font-size:2.2rem;text-align:center;color:var(--life);margin-bottom:.3rem}
+
+  /* ============ ENHANCE: TABLET ============ */
+  @media (min-width:680px){
+    .app{padding:18px;gap:16px}
+    header.top{flex-direction:row;justify-content:space-between;align-items:flex-end}
+    .head-tools{justify-content:flex-end}
+    .tabs{width:auto}
+    .tab{flex:0 0 auto}
+    .subtitle{font-size:.95rem}
+  }
+
+  /* ============ ENHANCE: DESKTOP APP-SHELL ============ */
+  @media (min-width:1024px){
+    .app{height:100dvh;padding:clamp(18px,2.2vw,28px)}
+    .work{display:grid;grid-template-columns:250px minmax(0,1fr) 372px;gap:16px;flex:1;min-height:0;align-items:stretch}
+    .card{min-height:0}
+    .flist{max-height:none;flex:1}
+    .canvaswrap{flex:1;min-height:0}
+    .reader{overflow:auto;flex:1;min-height:0}
+    .train.on{flex-direction:row;flex:1;min-height:0;gap:16px}
+    .train .arena{flex:1;min-height:0}
+    .train .arena .duel{flex:1;min-height:0}
+    .train-side{width:350px;min-height:0}
+    .train-body{overflow:auto;flex:1;min-height:0}
+    .spec-choice{max-width:46vh}
+    .wall.on{flex-direction:row;flex:1;min-height:0;gap:16px}
+    .wall .wall-principles{width:236px;min-height:0}
+    .wp-list{max-height:none;flex:1}
+    .wall .wall-arena{flex:1;min-height:0}
+    .wall .wall-stage-wrap{flex:1;min-height:0}
+    .wall .wall-read{width:344px;min-height:0}
+    .wall-reading{overflow:auto;flex:1;min-height:0}
+  }
+
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+</style>
+
+<div class="app">
+  <header class="top">
+    <div>
+      <p class="eyebrow">The Nature of Order · Book One · Christopher Alexander</p>
+      <h1 class="title">The Phenomenon of <em>Life</em></h1>
+      <p class="subtitle">Some things are more alive than others — objectively. The same fifteen properties that make a carpet live can make a wall of family portraits feel like home. Tune, compose, and find the balance.</p>
+    </div>
+    <div class="head-tools">
+      <div class="tabs">
+        <button class="tab on" data-tab="study">Compose life</button>
+        <button class="tab" data-tab="train">Train the eye</button>
+        <button class="tab" data-tab="wall">Family wall</button>
+      </div>
+      <button class="btn" id="howBtn">How</button>
+      <button class="btn" id="themeBtn">Theme</button>
+    </div>
+  </header>
+
+  <!-- STUDY -->
+  <div id="studyWrap">
+    <div class="commission">
+      <div class="goal"><span class="glabel">The Work</span>
+        <b>Find the living whole.</b> Not by adding everything — by balancing. Ornament without rest kills life.</div>
+      <div class="meters">
+        <div class="meter">
+          <div class="mlabel"><span>Degree of life</span><span><span class="lifelabel" id="lifeLabel">lifeless</span> <span class="mval" id="lifePct">0%</span></span></div>
+          <div class="lifebar" id="lifebar"><span id="lifeFill"></span></div>
+        </div>
+        <div class="meter" style="min-width:auto;flex:0 1 auto">
+          <div class="mlabel"><span>Properties</span><span class="mval"><span id="propN">0</span>/15</span></div>
+          <div class="propdots" id="propdots"></div>
+        </div>
+      </div>
+    </div>
+    <div class="work">
+      <section class="card specimen" id="specimenCard">
+        <div class="card-h"><span>The Specimen — a Persian carpet</span><span class="alive">◈ alive</span></div>
+        <div class="canvaswrap"><div class="canvasframe"><canvas id="specimen"></canvas></div></div>
+        <div class="controls">
+          <select class="ctrl" id="paletteSel" title="Colour palette"></select>
+          <button class="ctrl" id="surpriseBtn">✦ Surprise me</button>
+          <button class="ctrl" id="compareBtn">Hold: lifeless</button>
+          <button class="ctrl" id="clearBtn">Clear</button>
+          <button class="ctrl primary" id="allBtn2">Apply all</button>
+        </div>
+      </section>
+      <aside class="card reader-card">
+        <div class="card-h">The Property</div>
+        <div class="reader intro" id="reader"></div>
+      </aside>
+      <aside class="card fifteen">
+        <div class="card-h"><span>The Fifteen Properties</span></div>
+        <div class="flist" id="flist"></div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- TRAIN -->
+  <div class="train" id="trainWrap">
+    <section class="card arena">
+      <div class="card-h"><span>The Mirror of the Self</span><span class="mono" id="trainScore">0 / 0 · streak 0</span></div>
+      <p class="duel-q">Which has the greater degree of life? Not which is busier — ask which feels more whole, more like a picture of your own self at ease. Then tap it.</p>
+      <div class="duel">
+        <div class="spec-choice" data-side="0"><canvas data-c="0"></canvas><button class="choose-btn" data-choose="0">More life</button></div>
+        <div class="spec-choice" data-side="1"><canvas data-c="1"></canvas><button class="choose-btn" data-choose="1">More life</button></div>
+      </div>
+    </section>
+    <aside class="card train-side">
+      <div class="card-h">The Reading</div>
+      <div class="train-body" id="trainBody"></div>
+    </aside>
+  </div>
+
+  <!-- FAMILY WALL -->
+  <div class="wall" id="wallWrap">
+    <section class="card wall-arena">
+      <div class="card-h"><span>The Family Wall</span><span class="wall-tag" id="wallTag">unsettled</span></div>
+      <div class="wall-stage-wrap"><div class="wall-stage" id="wallStage">
+        <div class="console"></div>
+        <div class="guide v" id="guideV"></div>
+        <div class="guide h" id="guideH"></div>
+      </div></div>
+      <div class="controls">
+        <button class="ctrl" data-preset="salon">Salon cluster</button>
+        <button class="ctrl" data-preset="grid">Even grid</button>
+        <button class="ctrl" data-preset="row">Row</button>
+        <button class="ctrl" data-preset="diamond">Diamond</button>
+        <button class="ctrl" data-preset="scatter">Scattered</button>
+        <button class="ctrl act" id="snapBtn">Snap: on</button>
+      </div>
+    </section>
+    <aside class="card wall-principles">
+      <div class="card-h"><span>Principles at Play</span></div>
+      <div class="wp-list" id="wpList"></div>
+    </aside>
+    <aside class="card wall-read">
+      <div class="card-h">The Reading</div>
+      <div class="wall-reading" id="wallReading"></div>
+    </aside>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   THE FIFTEEN FUNDAMENTAL PROPERTIES — Book One.
+   Definitions paraphrased for learning.
+   ============================================================ */
+const PROPS=[
+ {n:1,name:"Levels of Scale",def:"A balanced range of sizes among the centers — big, medium, and small — with jumps between them that are neither too large nor too even (roughly one to two, up to one to four).",why:"each center is held up by ones a little larger and a little smaller, so the eye can move all the way in and all the way out without ever falling off a cliff."},
+ {n:2,name:"Strong Centers",def:"A definite field of force with a clear focus, toward which the other centers all point and which they, in turn, reinforce.",why:"a whole needs a heart — a place the whole thing gathers around — or it drifts apart into unrelated pieces."},
+ {n:3,name:"Boundaries",def:"A thick edge, itself made of centers, that surrounds and completes the thing it bounds — at once separating it and tying it to what lies beyond.",why:"a real boundary focuses a center inward while connecting it outward, so the center becomes distinct without becoming cut off."},
+ {n:4,name:"Alternating Repetition",def:"Centers that repeat — and the repetition made stronger because a second kind of center alternates with the first.",why:"the alternation turns the spaces in between into centers too, so the rhythm is doubly alive instead of a flat, mechanical drumbeat."},
+ {n:5,name:"Positive Space",def:"Every center swells outward and is convex; and the space between the centers is just as shaped and positive as the centers themselves — nothing is left over.",why:"when even the 'empty' space is a center in its own right, the whole surface is full of life, with no dead residue between the parts."},
+ {n:6,name:"Good Shape",def:"A center built from the simplest, most coherent shapes — shapes which are themselves made of strong centers, and which feel whole standing alone.",why:"a good shape rings true on its own, and lends that same rightness to everything it is part of."},
+ {n:7,name:"Local Symmetries",def:"Many small symmetries among the parts, rather than one great overall symmetry imposed on the whole.",why:"small local symmetries make a robust, forgiving order that can adapt to an irregular world — where one rigid symmetry would shatter."},
+ {n:8,name:"Deep Interlock and Ambiguity",def:"Centers that hook into their surroundings so tightly that it becomes ambiguous where one ends and the next begins.",why:"when parts interlock and share a zone of belonging, they cannot be pulled apart, and the connection between them becomes profound."},
+ {n:9,name:"Contrast",def:"Real opposites — light and dark, solid and void, high and low — that let neighboring centers differentiate and so become truly distinct.",why:"without genuine difference nothing stands out and nothing can be itself; contrast is what lets a center exist at all."},
+ {n:10,name:"Gradients",def:"Qualities that change gradually across space — size, spacing, color — so the structure answers to the differing conditions across it.",why:"living things are never uniform; a gradient lets the form vary exactly as much as its situation demands."},
+ {n:11,name:"Roughness",def:"The looseness and irregularity that comes from solving each part in its own place, rather than from carelessness — the freedom of the working hand.",why:"mechanical exactness kills life; the small unrepeatable irregularities are the very signature of something made whole, by care, in the world."},
+ {n:12,name:"Echoes",def:"Deep similarities of angle and shape running through all the parts — a family resemblance beneath the surface variety.",why:"echoes make the parts kin to one another, so the whole reads as one family with a single character rather than a crowd of strangers."},
+ {n:13,name:"The Void",def:"A great, calm emptiness somewhere near the centre, against which all the intricate detail can exist.",why:"the quiet of the void gives the fullness somewhere to rest; without it, a mass of detail suffocates and no single thing can breathe."},
+ {n:14,name:"Simplicity and Inner Calm",def:"A quality of slowness and quiet — nothing unnecessary, every part doing real work, the whole settled and at rest.",why:"life is not busyness; when everything extraneous is taken away, what remains is pure, and it becomes still enough to feel truly alive."},
+ {n:15,name:"Not-Separateness",def:"The living thing is at one with its world; its edges melt outward and it is never experienced as separate from all that surrounds it.",why:"this is the deepest property — a whole so connected to its surroundings that it and the world are, in the end, continuous. Life reaching past its own edge."},
+];
+const byN={}; PROPS.forEach(p=>byN[p.n]=p);
+function pct(v){return Math.round(v*100)+"%";}
+const x1=v=>v.toFixed(1)+"×";
+const CONTROLS={
+ 1:[{k:"frames",l:"Nested scales",min:2,max:5,step:1,def:3},{k:"ratio",l:"Scale jump",min:1.2,max:1.9,step:0.05,def:1.4,f:v=>v.toFixed(2)}],
+ 2:[{k:"size",l:"Medallion size",min:0.08,max:0.2,step:0.005,def:0.145,f:pct},{k:"petals",l:"Points",min:6,max:16,step:1,def:12},{k:"layers",l:"Rings",min:1,max:4,step:1,def:3}],
+ 3:[{k:"thick",l:"Border width",min:0.03,max:0.11,step:0.005,def:0.06,f:pct}],
+ 4:[{k:"count",l:"Motif count",min:16,max:56,step:2,def:40}],
+ 5:[{k:"size",l:"Cartouche size",min:0.02,max:0.08,step:0.005,def:0.05,f:pct}],
+ 6:[{k:"round",l:"Roundness",min:0,max:1,step:0.05,def:1,f:pct}],
+ 7:[{k:"order",l:"Symmetry order",min:3,max:8,step:1,def:4},{k:"size",l:"Floret size",min:0.008,max:0.022,step:0.002,def:0.014,f:pct}],
+ 8:[{k:"depth",l:"Interlock depth",min:0.006,max:0.038,step:0.002,def:0.018,f:pct}],
+ 9:[{k:"intensity",l:"Contrast",min:0.3,max:1,step:0.05,def:1,f:pct}],
+ 10:[{k:"strength",l:"Gradient",min:0,max:1,step:0.05,def:0.6,f:pct}],
+ 11:[{k:"amount",l:"Roughness",min:0,max:1,step:0.05,def:0.4,f:pct}],
+ 12:[{k:"echoSize",l:"Echo size",min:0.02,max:0.07,step:0.005,def:0.05,f:pct}],
+ 13:[{k:"radius",l:"Void size",min:1.3,max:2.6,step:0.1,def:1.9,f:x1}],
+ 14:[{k:"calm",l:"Inner calm",min:0,max:1,step:0.05,def:0.55,f:pct}],
+ 15:[{k:"reach",l:"Reach outward",min:0.4,max:2,step:0.1,def:1,f:x1}],
+};
+const norm=(v,a,b)=>Math.max(0,Math.min(1,(v-a)/(b-a)));
+const clamp01=v=>Math.max(0,Math.min(1,v));
+
+const PALETTES={
+ classic:{name:"Madder & Indigo",ground:"#E8DDBF",ink:"#2C2114",fig:"#A6432E",fig2:"#2E4A63",accent:"#B0812C",green:"#6E7B45"},
+ autumn:{name:"Autumn Kilim",ground:"#EBDFC2",ink:"#3A2A18",fig:"#B5502A",fig2:"#7A4A22",accent:"#C99A32",green:"#7E7A38"},
+ rose:{name:"Rose Garden",ground:"#EEE3D3",ink:"#3A2430",fig:"#AA4A63",fig2:"#5E7B5A",accent:"#C79A46",green:"#6E8A63"},
+ verdigris:{name:"Verdigris & Coral",ground:"#E6E3CC",ink:"#1F2E2A",fig:"#2E7D6E",fig2:"#B5603A",accent:"#C0912F",green:"#4E7A52"},
+ indigo:{name:"Indigo Night",ground:"#E3E0CC",ink:"#20263A",fig:"#3B5488",fig2:"#9C3F3A",accent:"#BE9438",green:"#5C7356"},
+ plum:{name:"Plum & Saffron",ground:"#ECE1CB",ink:"#33223A",fig:"#7A4468",fig2:"#417066",accent:"#C88B2E",green:"#6C7C46"},
+};
+
+function hexToRgb(h){h=h.replace("#","");return[parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];}
+function hexLerp(a,b,t){t=Math.max(0,Math.min(1,t));const A=hexToRgb(a),B=hexToRgb(b);
+  return`rgb(${Math.round(A[0]+(B[0]-A[0])*t)},${Math.round(A[1]+(B[1]-A[1])*t)},${Math.round(A[2]+(B[2]-A[2])*t)})`;}
+
+function defaultProps(){const o={};PROPS.forEach(p=>{const pr={on:false};(CONTROLS[p.n]||[]).forEach(c=>pr[c.k]=c.def);o[p.n]=pr;});return o;}
+let state={palette:"classic",props:defaultProps()};
+function stateFromSpec(spec,palette){const s={palette:palette||state.palette,props:defaultProps()};
+  for(const n in spec){s.props[n].on=true;Object.assign(s.props[n],spec[n]);}return s;}
+function deadState(palette){return{palette:palette||state.palette,props:defaultProps()};}
+let selected=1, comparing=false, hasBeenAlive=false;
+
+/* ---- degree of life model ---- */
+function presence(pr,n){
+  if(!pr[n].on)return 0; const p=pr[n];
+  switch(n){
+    case 1: return 0.55+0.45*norm(p.frames,2,5);
+    case 2: return 0.35+0.65*norm(p.size,0.08,0.2);
+    case 3: return 0.4+0.6*norm(p.thick,0.03,0.11);
+    case 4: return norm(p.count,16,56);
+    case 5: return 0.55+0.45*norm(p.size,0.02,0.08);
+    case 6: return p.round;
+    case 7: return 0.5+0.5*norm(p.order,3,8);
+    case 8: return norm(p.depth,0.006,0.038);
+    case 9: return p.intensity;
+    case 10: return p.strength;
+    case 11: return p.amount;
+    case 12: return norm(p.echoSize,0.02,0.07);
+    case 13: return norm(p.radius,1.3,2.6);
+    case 14: return p.calm;
+    case 15: return norm(p.reach,0.4,2);
+  } return 1;
+}
+function computeLife(st){
+  const pr=st.props, P=n=>presence(pr,n);
+  const hasHeart=P(2), groundedness=(P(1)+P(3)+P(5))/3, differentiation=0.6*P(9)+0.4*P(6),
+    connectedness=P(15), rhythm=(P(4)+P(12)+P(7)+P(8)+P(10))/5, calm=0.62*P(13)+0.38*P(14), rough=P(11);
+  const handLife=1-Math.min(1,Math.abs(rough-0.45)/0.6), rhythmMod=rhythm*(0.35+0.65*calm);
+  let base=0.26*hasHeart+0.17*groundedness+0.15*differentiation+0.10*connectedness+0.09*handLife+0.09*calm+0.14*rhythmMod;
+  const overload=Math.max(0,rhythm-(0.35+0.65*calm));
+  let life=base*(1-0.55*overload);
+  if(hasHeart<0.15) life*=0.45+hasHeart;
+  life=clamp01(life);
+  let label="stirring";
+  if(life<0.16)label="lifeless"; else if(overload>0.26)label="crowded"; else if(life>=0.72)label="alive"; else if(life>=0.5)label="coming alive";
+  return {life,label,overload,hasHeart,groundedness,differentiation,connectedness,rhythm,calm,handLife,count:Object.values(pr).filter(x=>x.on).length};
+}
+
+/* ---- carpet renderer ---- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);
+  t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+function rosette(ctx,x,y,r,petals,inner,smooth,fill,stroke,lw){
+  const steps=petals*2;ctx.beginPath();
+  for(let i=0;i<=steps;i++){const a=i/steps*Math.PI*2-Math.PI/2, rr=(i%2===0)?r:r*inner;
+    const px=x+Math.cos(a)*rr, py=y+Math.sin(a)*rr;
+    if(smooth){if(i===0)ctx.moveTo(px,py);else ctx.quadraticCurveTo(x+Math.cos(a-Math.PI/steps)*r*1.02,y+Math.sin(a-Math.PI/steps)*r*1.02,px,py);}
+    else{i===0?ctx.moveTo(px,py):ctx.lineTo(px,py);}}
+  ctx.closePath();if(fill){ctx.fillStyle=fill;ctx.fill();}if(stroke){ctx.lineWidth=lw;ctx.strokeStyle=stroke;ctx.stroke();}}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function perimeterPoints(x,y,w,h,count){const per=2*(w+h),pts=[];
+  for(let i=0;i<count;i++){let d=i/count*per,px,py,nx,ny;
+    if(d<w){px=x+d;py=y;nx=0;ny=-1;}else if(d<w+h){py=y+(d-w);px=x+w;nx=1;ny=0;}
+    else if(d<2*w+h){px=x+w-(d-w-h);py=y+h;nx=0;ny=1;}else{py=y+h-(d-2*w-h);px=x;nx=-1;ny=0;}
+    pts.push({x:px,y:py,nx,ny,g:Math.abs(Math.sin(i/count*Math.PI*3))});}
+  return pts;}
+function drawCarpet(ctx,W,H,st){
+  const pr=st.props, on=n=>pr[n].on, P=n=>pr[n];
+  const base=PALETTES[st.palette]||PALETTES.classic, neutral="#a89a7e";
+  const rich=on(9), ti=rich?(0.26+0.74*P(9).intensity):0.12;
+  const col={ground:base.ground,line:rich?hexLerp("#8c7d61",base.ink,0.4+0.6*P(9).intensity):"#8c7d61",
+    fig:hexLerp(neutral,base.fig,ti),fig2:hexLerp(neutral,base.fig2,ti),accent:hexLerp(neutral,base.accent,ti),green:hexLerp(neutral,base.green,ti)};
+  const S=Math.min(W,H),cx=W/2,cy=H/2, rng=mulberry32(9871);
+  const rough=on(11)?P(11).amount*S*0.013:0, jj=()=>(rng()*2-1)*rough;
+  const gOn=on(6),inner=gOn?0.42+P(6).round*0.36:0.42,smooth=gOn, gradS=on(10)?P(10).strength:0, lw=k=>Math.max(1,S*k);
+  ctx.clearRect(0,0,W,H);
+  if(on(15)){ctx.save();ctx.strokeStyle=col.line;ctx.globalAlpha=.5;ctx.lineWidth=lw(0.004);
+    const pad=S*0.055,reach=P(15).reach,n=44;
+    for(let i=0;i<n;i++){const t=i/n,len=S*(0.016+rng()*0.02)*reach;
+      [[pad+t*(W-2*pad),pad,0,-1],[pad+t*(W-2*pad),H-pad,0,1],[pad,pad+t*(H-2*pad),-1,0],[W-pad,pad+t*(H-2*pad),1,0]]
+        .forEach(([x,y,dx,dy])=>{ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+dx*len,y+dy*len);ctx.stroke();});}
+    ctx.restore();}
+  const pad=S*0.06,fx=pad,fy=pad,fw=W-2*pad,fh=H-2*pad;
+  ctx.save();ctx.shadowColor="rgba(40,28,14,.18)";ctx.shadowBlur=S*0.03;ctx.shadowOffsetY=S*0.01;
+  ctx.fillStyle=col.ground;roundRect(ctx,fx,fy,fw,fh,S*0.012);ctx.fill();ctx.restore();
+  if(on(14)){const c=P(14).calm,g=ctx.createRadialGradient(cx,cy,S*0.06,cx,cy,S*0.62);
+    g.addColorStop(0,`rgba(255,247,225,${0.10+0.18*c})`);g.addColorStop(1,`rgba(120,86,40,${0.03+0.06*c})`);
+    ctx.fillStyle=g;roundRect(ctx,fx,fy,fw,fh,S*0.012);ctx.fill();}
+  const frames=[];
+  if(on(1)){let ins=pad+S*0.026,gap=S*0.05,ratio=P(1).ratio;for(let k=0;k<P(1).frames;k++){frames.push(ins);ins+=gap;gap/=ratio;}}
+  const bthick=on(3)?P(3).thick:0.02, innerInset=pad+S*(bthick+(on(1)?0.02:0));
+  const ifx=innerInset,ify=innerInset,ifw=W-2*innerInset,ifh=H-2*innerInset;
+  if(on(3)){ctx.save();ctx.beginPath();
+    roundRect(ctx,fx+S*0.02,fy+S*0.02,fw-S*0.04,fh-S*0.04,S*0.01);roundRect(ctx,ifx,ify,ifw,ifh,S*0.008);
+    ctx.fillStyle=rich?base.fig2:"#b8ab8d";ctx.globalAlpha=rich?0.9:0.6;ctx.fill("evenodd");ctx.restore();
+    if(on(4)){const count=P(4).count,perim=perimeterPoints(fx+S*0.045,fy+S*0.045,fw-S*0.09,fh-S*0.09,count);
+      perim.forEach((pt,i)=>{const r=S*0.016*(0.7+0.5*(1-gradS)+gradS*pt.g);
+        if(i%2===0)rosette(ctx,pt.x+jj(),pt.y+jj(),r,6,inner,smooth,col.accent,col.line,lw(0.0025));
+        else{ctx.beginPath();ctx.moveTo(pt.x,pt.y-r);ctx.lineTo(pt.x+r,pt.y);ctx.lineTo(pt.x,pt.y+r);ctx.lineTo(pt.x-r,pt.y);ctx.closePath();
+          ctx.fillStyle=col.fig;ctx.fill();ctx.lineWidth=lw(0.0022);ctx.strokeStyle=col.line;ctx.stroke();}});}}
+  if(on(8)){ctx.save();ctx.strokeStyle=col.green;ctx.lineWidth=lw(0.006);ctx.globalAlpha=.9;
+    const depth=P(8).depth*S,pts=perimeterPoints(ifx,ify,ifw,ifh,64);ctx.beginPath();
+    pts.forEach((pt,i)=>{const off=(i%2?1:-1)*depth,x=pt.x+pt.nx*off+jj(),y=pt.y+pt.ny*off+jj();i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});
+    ctx.closePath();ctx.stroke();ctx.restore();}
+  if(on(5)){const R=P(5).size*S,mids=[[cx,ify+ifh*0.16],[cx,ify+ifh*0.84],[ifx+ifw*0.16,cy],[ifx+ifw*0.84,cy]];
+    mids.forEach(([x,y],i)=>{const horiz=i>=2;ctx.save();ctx.translate(x,y);if(horiz)ctx.rotate(Math.PI/2);
+      ctx.beginPath();ctx.moveTo(0,-R);ctx.quadraticCurveTo(R*0.7,0,0,R);ctx.quadraticCurveTo(-R*0.7,0,0,-R);ctx.closePath();
+      ctx.fillStyle=col.green;ctx.globalAlpha=.85;ctx.fill();ctx.globalAlpha=1;ctx.lineWidth=lw(0.0022);ctx.strokeStyle=col.line;ctx.stroke();ctx.restore();});}
+  if(on(7)){const order=P(7).order,fs=P(7).size*S;
+    [[ifx+ifw*0.13,ify+ifh*0.13],[ifx+ifw*0.87,ify+ifh*0.13],[ifx+ifw*0.13,ify+ifh*0.87],[ifx+ifw*0.87,ify+ifh*0.87]].forEach(([x,y])=>{
+      for(let k=0;k<order;k++){const a=k/order*Math.PI*2,r=S*0.02;rosette(ctx,x+Math.cos(a)*r+jj(),y+Math.sin(a)*r+jj(),fs,5,inner,smooth,col.fig2,col.line,lw(0.002));}
+      rosette(ctx,x,y,fs*0.9,6,inner,smooth,col.accent,col.line,lw(0.002));});}
+  const medR=on(2)?P(2).size*S:0;
+  if(on(12)&&on(2)){const es=P(12).echoSize*S;
+    [[ifx+ifw*0.22,ify+ifh*0.22],[ifx+ifw*0.78,ify+ifh*0.22],[ifx+ifw*0.22,ify+ifh*0.78],[ifx+ifw*0.78,ify+ifh*0.78]].forEach(([x,y])=>{
+      rosette(ctx,x,y,es,8,inner,smooth,col.fig,col.line,lw(0.0025));rosette(ctx,x,y,es*0.55,8,inner,smooth,col.accent,col.line,lw(0.002));});}
+  if(on(13)&&on(2)){ctx.beginPath();ctx.arc(cx,cy,medR*P(13).radius,0,Math.PI*2);
+    ctx.fillStyle=col.ground;ctx.fill();ctx.lineWidth=lw(0.0018);ctx.strokeStyle=col.line;ctx.globalAlpha=.32;ctx.stroke();ctx.globalAlpha=1;}
+  if(on(2)){const petals=P(2).petals,layers=P(2).layers;
+    if(gradS>0){const g=ctx.createRadialGradient(cx,cy,0,cx,cy,medR*1.3);g.addColorStop(0,col.fig);g.addColorStop(1,col.fig2);
+      rosette(ctx,cx,cy,medR*1.12,petals,inner,smooth,null,null,0);ctx.fillStyle=g;ctx.globalAlpha=0.35+0.5*gradS;ctx.fill();ctx.globalAlpha=1;}
+    rosette(ctx,cx+jj(),cy+jj(),medR,petals,inner,smooth,col.fig,col.line,lw(0.004));
+    if(layers>=2)rosette(ctx,cx,cy,medR*0.66,Math.max(6,petals-4),inner,smooth,col.accent,col.line,lw(0.003));
+    if(layers>=3)rosette(ctx,cx,cy,medR*0.38,Math.max(6,petals-6),inner,smooth,col.fig2,col.line,lw(0.0025));
+    if(layers>=4)rosette(ctx,cx,cy,medR*0.2,6,inner,smooth,col.green,col.line,lw(0.002));
+    ctx.beginPath();ctx.arc(cx,cy,medR*0.11,0,Math.PI*2);ctx.fillStyle=col.accent;ctx.fill();
+  }else{ctx.globalAlpha=.22;ctx.strokeStyle=col.line;ctx.lineWidth=1;ctx.strokeRect(cx-S*0.05,cy-S*0.05,S*0.1,S*0.1);ctx.globalAlpha=1;}
+  if(on(1)){ctx.strokeStyle=col.line;ctx.globalAlpha=.85;
+    frames.forEach((ins,k)=>{ctx.lineWidth=lw(Math.max(0.001,0.004-k*0.0008));roundRect(ctx,ins,ins,W-2*ins,H-2*ins,S*0.01);ctx.stroke();});ctx.globalAlpha=1;}
+}
+
+function fit(cnv){const r=cnv.getBoundingClientRect();const dpr=Math.min(2,window.devicePixelRatio||1);
+  const w=Math.max(1,Math.round(r.width*dpr)),h=Math.max(1,Math.round(r.height*dpr));
+  if(cnv.width!==w)cnv.width=w;if(cnv.height!==h)cnv.height=h;return cnv.getContext("2d");}
+let rafPending=false;
+function renderSpecimen(){const c=document.getElementById("specimen");const ctx=fit(c);drawCarpet(ctx,c.width,c.height,comparing?deadState(state.palette):state);}
+function scheduleRender(){if(rafPending)return;rafPending=true;requestAnimationFrame(()=>{rafPending=false;renderSpecimen();renderMeters();});}
+
+function buildList(){const el=document.getElementById("flist");el.innerHTML="";
+  PROPS.forEach(p=>{const b=document.createElement("button");
+    b.className="prow"+(state.props[p.n].on?" applied":"")+(selected===p.n?" sel":"");b.dataset.n=p.n;
+    b.innerHTML=`<span class="pn">${String(p.n).padStart(2,"0")}</span><span class="pname">${p.name}</span><span class="pcheck">✓</span>`;
+    b.onclick=()=>{selected=p.n;renderReader();markList();};el.appendChild(b);});}
+function markList(){document.querySelectorAll(".prow").forEach(b=>{const n=+b.dataset.n;b.classList.toggle("applied",state.props[n].on);b.classList.toggle("sel",selected===n);});}
+function buildDots(){const el=document.getElementById("propdots");el.innerHTML="";PROPS.forEach(()=>el.appendChild(document.createElement("i")));}
+function buildPalettes(){const s=document.getElementById("paletteSel");s.innerHTML="";
+  for(const k in PALETTES){const o=document.createElement("option");o.value=k;o.textContent=PALETTES[k].name;s.appendChild(o);}s.value=state.palette;}
+function renderMeters(){
+  const L=computeLife(state),p=Math.round(L.life*100);
+  document.getElementById("lifeFill").style.width=p+"%";document.getElementById("lifePct").textContent=p+"%";
+  document.getElementById("propN").textContent=L.count;
+  const lab=document.getElementById("lifeLabel");lab.textContent=L.label;lab.className="lifelabel"+(L.label==="alive"?" alive":(L.label==="crowded"?" crowded":""));
+  document.getElementById("lifebar").classList.toggle("crowded",L.label==="crowded");
+  [...document.getElementById("propdots").children].forEach((d,i)=>d.classList.toggle("lit",state.props[PROPS[i].n].on));
+  const aliveNow=L.life>=0.72;document.getElementById("specimenCard").classList.toggle("alive",aliveNow);
+  if(aliveNow&&!hasBeenAlive){hasBeenAlive=true;showWin();}}
+function renderReader(){
+  const el=document.getElementById("reader");el.classList.remove("intro");
+  const p=byN[selected],on=state.props[p.n].on;
+  let sliders="";
+  if(on&&CONTROLS[p.n]){sliders=`<div class="adjust"><div class="lbl">Tune this property</div>`+
+    CONTROLS[p.n].map(c=>{const v=state.props[p.n][c.k],f=c.f?c.f(v):(''+v),fill=norm(v,c.min,c.max)*100;
+      return`<div class="slider"><div class="srow"><span>${c.l}</span><span class="sval" data-sv="${p.n}-${c.k}">${f}</span></div>
+        <input type="range" data-ck="${c.k}" min="${c.min}" max="${c.max}" step="${c.step}" value="${v}" style="--fill:${fill}%"></div>`;}).join("")+`</div>`;}
+  el.innerHTML=`
+    <span class="rd-kicker">Property ${String(p.n).padStart(2,"0")} of 15</span>
+    <div class="rd-title">${p.name}</div>
+    <span class="status ${on?"on":"off"}">${on?"◈ present in the specimen":"◌ not yet present"}</span>
+    <div class="rd-sect"><div class="lbl">What it is</div><div class="txt">${p.def}</div></div>
+    <div class="rd-sect why"><div class="lbl">Why it gives life</div><div class="txt">${p.why}</div></div>
+    <div class="rd-sect"><div class="lbl">See its work in the carpet</div>
+      <div class="compare"><div class="cmp without"><canvas data-mini="without"></canvas><span class="cl">Without</span></div>
+        <div class="cmp with"><canvas data-mini="with"></canvas><span class="cl">With №${String(p.n).padStart(2,"0")}</span></div></div></div>
+    <button class="apply-btn ${on?"remove":"add"}" id="applyBtn">${on?"Remove this property":"Apply to the specimen ↦"}</button>${sliders}`;
+  const full={};PROPS.forEach(q=>full[q.n]={});
+  const without=stateFromSpec(full,state.palette);without.props[p.n].on=false;
+  const withS=stateFromSpec(full,state.palette);
+  const ma=el.querySelector('[data-mini="without"]'),mb=el.querySelector('[data-mini="with"]');
+  requestAnimationFrame(()=>{drawCarpet(fit(ma),ma.width,ma.height,without);drawCarpet(fit(mb),mb.width,mb.height,withS);});
+  document.getElementById("applyBtn").onclick=()=>toggle(p.n);
+  el.querySelectorAll('input[type=range]').forEach(inp=>{inp.oninput=()=>{const k=inp.dataset.ck,val=parseFloat(inp.value);state.props[p.n][k]=val;
+    const c=CONTROLS[p.n].find(x=>x.k===k),sv=el.querySelector(`[data-sv="${p.n}-${k}"]`);if(sv)sv.textContent=c.f?c.f(val):(''+val);
+    inp.style.setProperty("--fill",norm(val,c.min,c.max)*100+"%");scheduleRender();};});}
+function introHTML(){return `<div class="rd-open">
+    <p class="lead">Alexander's claim is startling: <b>life is not in the eye of the beholder.</b> Faced with two things, people agree — far more than they expect — on which has more life.</p>
+    <p>He traced that agreement to fifteen <b>geometric properties</b>. But <b>life is not their sum.</b> A crowded thing is often <em>dead</em>; a plain, quiet thing can be intensely alive. Two of the fifteen — <em>the Void</em> and <em>Inner Calm</em> — are about emptiness itself.</p>
+    <ol><li><b>Choose a property</b>, read it, and <em>apply</em> it — then open its dials and tune it.</li>
+      <li><b>Watch the degree of life.</b> Add ornament without rest and life <em>falls</em>. Find the balance where it rises.</li>
+      <li><b>Cross to the Family Wall</b> to arrange four portraits by the very same principles.</li></ol>
+    <p style="font-style:italic;color:var(--ink-faint)">Select a property to begin.</p></div>`;}
+function toggle(n){state.props[n].on=!state.props[n].on;if(state.props[n].on)selected=n;
+  renderSpecimen();renderMeters();renderReader();markList();if(state.props[n].on)toast(`Applied <b>${byN[n].name}</b>.`);}
+function applyAll(){PROPS.forEach(p=>state.props[p.n].on=true);renderSpecimen();renderMeters();renderReader();markList();
+  const L=computeLife(state);toast(L.label==="alive"?"All fifteen present — and balanced.":"All fifteen present — yet only <b>"+Math.round(L.life*100)+"% alive.</b> More is not the same as alive.");}
+function clearAll(){state.props=defaultProps();hasBeenAlive=false;renderSpecimen();renderMeters();renderReader();markList();toast("Back to a lifeless field.");}
+function surprise(){const keys=Object.keys(PALETTES);state.palette=keys[Math.floor(Math.random()*keys.length)];document.getElementById("paletteSel").value=state.palette;
+  PROPS.forEach(p=>{const pr=state.props[p.n];pr.on=Math.random()<0.7;(CONTROLS[p.n]||[]).forEach(c=>{const steps=Math.round((c.max-c.min)/c.step);pr[c.k]=+(c.min+Math.round(Math.random()*steps)*c.step).toFixed(4);});});
+  state.props[2].on=true;hasBeenAlive=computeLife(state).life>=0.72;renderSpecimen();renderMeters();renderReader();markList();
+  const L=computeLife(state);toast(`A new specimen — <b>${L.label}</b>, ${Math.round(L.life*100)}% alive.`);}
+
+/* ============ TRAIN THE EYE ============ */
+let tScore=0,tTotal=0,tStreak=0,tRound=null,tAnswered=false;
+function rand(a,b){return a+Math.random()*(b-a);}
+function pickN(arr,n){const a=arr.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a.slice(0,n);}
+function makeState(recipe,palette){const spec={};const set=(n,o={})=>spec[n]=o;const ORN=[4,7,8,10,12];
+  if(recipe==="busy"){set(2,{size:rand(0.12,0.18),petals:Math.round(rand(8,16)),layers:3});set(3,{thick:rand(0.06,0.1)});set(9,{intensity:rand(0.8,1)});
+    ORN.forEach(n=>set(n,{}));set(6,{round:rand(0,0.4)});set(11,{amount:rand(0.7,1)});
+  }else if(recipe==="serene"){set(2,{size:rand(0.11,0.16),petals:Math.round(rand(8,12)),layers:2});set(3,{thick:rand(0.05,0.08)});
+    set(5,{});set(6,{round:rand(0.7,1)});set(9,{intensity:rand(0.55,0.85)});set(13,{radius:rand(1.9,2.5)});set(14,{calm:rand(0.6,0.95)});set(15,{reach:rand(0.9,1.6)});set(1,{frames:Math.round(rand(2,3))});
+    if(Math.random()<0.5)set(12,{echoSize:rand(0.03,0.05)});
+  }else if(recipe==="rich"){PROPS.forEach(p=>set(p.n,{}));set(13,{radius:rand(1.9,2.4)});set(14,{calm:rand(0.6,0.9)});set(11,{amount:rand(0.3,0.55)});set(9,{intensity:rand(0.8,1)});
+  }else{if(Math.random()<0.6)set(2,{size:rand(0.09,0.13),layers:1});pickN([1,3,5,9],2).forEach(n=>set(n,{}));if(Math.random()<0.4)set(11,{amount:rand(0.8,1)});}
+  Object.keys(spec).forEach(n=>{CONTROLS[n].forEach(c=>{if(spec[n][c.k]===undefined)spec[n][c.k]=c.def;});});
+  return stateFromSpec(spec,palette);}
+const PAIRS=[["busy","serene"],["busy","serene"],["rich","busy"],["sparse","serene"],["rich","sparse"],["busy","rich"],["serene","sparse"]];
+function newRound(){tAnswered=false;const pal=Object.keys(PALETTES)[Math.floor(Math.random()*Object.keys(PALETTES).length)];
+  let A,B,lifeA,lifeB,tries=0;
+  do{const pair=PAIRS[Math.floor(Math.random()*PAIRS.length)];const r=Math.random()<0.5?pair:[pair[1],pair[0]];
+    A=makeState(r[0],pal);B=makeState(r[1],pal);lifeA=computeLife(A);lifeB=computeLife(B);tries++;
+  }while(Math.abs(lifeA.life-lifeB.life)<0.1&&tries<12);
+  tRound={states:[A,B],lives:[lifeA,lifeB],strongIdx:lifeA.life>=lifeB.life?0:1};
+  document.querySelectorAll(".spec-choice").forEach((sc,i)=>{sc.className="spec-choice";const c=sc.querySelector("canvas");
+    requestAnimationFrame(()=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));});
+  document.getElementById("trainBody").innerHTML=`<p style="color:var(--ink-soft);font-style:italic">Look at each, and ask which one you would rather be — which is the truer picture of your own self, whole and at ease. That one has more life. It is not always the busier one.</p>`;
+  document.querySelectorAll(".choose-btn").forEach(b=>b.disabled=false);updateTrainScore();}
+function reasonFor(win,lose){
+  if(lose.overload-win.overload>0.14)return `The busier one piles on ornament with <b>too little rest</b> — and in Alexander's world that crowding <b>drains</b> life. The calmer one, with room to breathe, holds more.`;
+  if(win.hasHeart-lose.hasHeart>0.22)return `A <b>strong center</b> gives the living one a heart to gather around; the other drifts apart into unrelated parts.`;
+  if(win.calm-lose.calm>0.2)return `<b>The void and inner calm</b> — emptiness itself — give the quieter one more life than the restless one.`;
+  if(win.differentiation-lose.differentiation>0.2)return `Real <b>contrast and good shape</b> let its centers become distinct and truly present.`;
+  if(win.groundedness-lose.groundedness>0.2)return `A <b>well-formed field</b> — boundary and positive space — makes it whole where the other stays loose.`;
+  return `It <b>balances its parts</b> better — every property in service of the whole, none shouting over the rest.`;}
+function choose(i){if(tAnswered)return;tAnswered=true;
+  const correct=i===tRound.strongIdx;tTotal++;if(correct){tScore++;tStreak++;}else tStreak=0;
+  document.querySelectorAll(".spec-choice").forEach((sc,idx)=>{sc.classList.add(idx===tRound.strongIdx?"win":"lose");if(idx===i)sc.classList.add("pick");});
+  document.querySelectorAll(".choose-btn").forEach(b=>b.disabled=true);
+  const win=tRound.lives[tRound.strongIdx],lose=tRound.lives[1-tRound.strongIdx],wPct=Math.round(win.life*100),lPct=Math.round(lose.life*100);
+  const countNote=win.count<lose.count?`<div class="kicker-note"><b>Notice:</b> the more living one has <b>fewer</b> properties (${win.count}, not ${lose.count}). Life is not complexity — it is wholeness.</div>`:"";
+  document.getElementById("trainBody").innerHTML=`
+    <div class="verdict ${correct?"right":"wrong"}">${correct?"✓ You felt it.":"✕ The other one has more life."}</div>
+    <h3>Degree of life</h3>
+    <div class="lifecmp">
+      <div class="lc hi"><span>Living</span><div class="bar"><span style="width:${wPct}%"></span></div><span class="n">${wPct}%</span></div>
+      <div class="lc lo"><span>Less</span><div class="bar"><span style="width:${lPct}%"></span></div><span class="n">${lPct}%</span></div></div>
+    <p class="reason">${reasonFor(win,lose)}</p>${countNote}
+    <button class="next-btn show" id="nextRound">Next pair ↦</button>`;
+  document.getElementById("nextRound").onclick=newRound;updateTrainScore();}
+function updateTrainScore(){document.getElementById("trainScore").textContent=`${tScore} / ${tTotal} · streak ${tStreak}`;}
+
+/* ============================================================
+   THE FAMILY WALL — arrange four portraits by Alexander's
+   principles. Coordinate space is 100 (w) x 75 (h) units; with
+   a 4:3 stage, one unit is square in both axes.
+   ============================================================ */
+const WU={W:100,H:75,S:17};                 // unit space + frame side
+const CONSOLE={cx:50,top:61,halfW:23};
+const ROLES=[
+ {id:"father",name:"Father",bg:"#43596B",cloth:"#33475A",hair:"#382a20",scale:1.06,style:"short",beard:true},
+ {id:"mother",name:"Mother",bg:"#94555F",cloth:"#743F49",hair:"#43301f",scale:1.0,style:"long"},
+ {id:"girl1",name:"Girl",bg:"#A9852F",cloth:"#856726",hair:"#5a4029",scale:0.9,style:"pony"},
+ {id:"girl2",name:"Girl",bg:"#6C8258",cloth:"#516347",hair:"#4a3826",scale:0.9,style:"pig"},
+];
+const PRESETS={
+ salon:[{x:40,y:26},{x:60,y:25},{x:39,y:45},{x:61,y:46}],
+ grid: [{x:40,y:27},{x:60,y:27},{x:40,y:47},{x:60,y:47}],
+ row:  [{x:20,y:36},{x:40,y:36},{x:60,y:36},{x:80,y:36}],
+ diamond:[{x:50,y:19},{x:50,y:51},{x:34,y:35},{x:66,y:35}],
+ scatter:[{x:24,y:20},{x:72,y:26},{x:46,y:52},{x:83,y:57}],
+};
+const WALL={frames:PRESETS.salon.map(p=>({x:p.x,y:p.y})),snap:true,sel:null,photos:{}};
+const SKIN="#E3B892",SKIN_SH="#cf9f78";
+
+const WALL_PRINCIPLES=[
+ {key:"strongCenter",name:"Strong Center",sub:"one clear group",
+  def:"The four pictures should read as a single group with a clear centre of gravity — not as scattered, unrelated islands.",
+  tip:(g)=>"The pictures read as separate islands. Bring them closer so they form one group with a clear centre."},
+ {key:"positive",name:"Positive Space",sub:"shaped gaps",
+  def:"The gaps between the frames are themselves shapes. Keep them even and generous so the wall reads as figure and ground, not leftover slivers.",
+  tip:(g)=>g.overlap?"Two frames overlap — separate them so each can breathe.":"The gaps between frames are uneven. Even them out so the spaces become shapes of their own."},
+ {key:"breathing",name:"The Void & Boundaries",sub:"room to breathe",
+  def:"The cluster needs air around it — margins from the wall's edges, and a calm space that lets the group settle. Too cramped, or lost in a sea of wall, and it dies.",
+  tip:(g)=>g.mT<g.mB&&g.mT<7?"It's crowding the top — lower the whole group to give it air above.":(g.mB<3?"It's almost sitting on the console — lift it a little.":"Give the cluster more even margin from the wall's edges.")},
+ {key:"balance",name:"Balance & Local Symmetry",sub:"even weight",
+  def:"Visual weight should feel even left-to-right. Small local symmetries — a matched pair, a mirrored placement — steady the whole.",
+  tip:(g)=>g.cx<50?"The group leans left. Shift it right until the weight feels even.":"The group leans right. Shift it left until the weight feels even."},
+ {key:"notSep",name:"Belonging to the Room",sub:"tie to the console",
+  def:"Not-Separateness (and Pattern 253, Things From Your Life): the art must belong to the room. Centre the group over the console and keep it a comfortable height above — so picture and furniture become one thing.",
+  tip:(g)=>Math.abs(g.cx-CONSOLE.cx)>4?"The group drifts off the console below it. Slide it so its centre sits over the furniture.":(g.mB>13?"It floats high above the console — bring it down so the two belong together.":"Settle the group just above the console so they read as one.")},
+ {key:"goodShape",name:"Good Shape",sub:"clean silhouette",
+  def:"The overall outline of the group should itself be a good shape — a tight cluster or clean rectangle — rather than a ragged scatter.",
+  tip:(g)=>"The silhouette is ragged. Line the frames into a clean cluster or grid so the outline itself becomes a good shape."},
+ {key:"alignment",name:"Alignment & Echoes",sub:"lines that agree",
+  def:"When frames share alignment lines — edges or centres that line up — they echo one another and the wall gains quiet order.",
+  tip:(g)=>"Nothing lines up. Align edges or centres so the frames echo one another."},
+];
+const WP=Object.fromEntries(WALL_PRINCIPLES.map(p=>[p.key,p]));
+
+/* ---- portrait drawing ---- */
+function drawPortrait(ctx,W,H,role){
+  const cfg=ROLES.find(r=>r.id===role);ctx.clearRect(0,0,W,H);
+  const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,hexLerp(cfg.bg,"#ffffff",0.30));g.addColorStop(1,cfg.bg);
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  const cx=W/2, sc=cfg.scale, hr=W*0.185*sc, hy=H*0.44, hrY=hr*1.14;
+  // hair behind (long / pig / pony mass)
+  ctx.fillStyle=cfg.hair;
+  if(cfg.style==="long"){ctx.beginPath();ctx.ellipse(cx,hy+hr*0.35,hr*1.28,hrY*1.22,0,0,Math.PI*2);ctx.fill();}
+  // shoulders
+  ctx.fillStyle=cfg.cloth;const shW=W*0.46*sc;
+  ctx.beginPath();ctx.moveTo(cx-shW,H+2);ctx.quadraticCurveTo(cx-shW,H*0.72,cx-W*0.15*sc,H*0.69);
+  ctx.lineTo(cx+W*0.15*sc,H*0.69);ctx.quadraticCurveTo(cx+shW,H*0.72,cx+shW,H+2);ctx.closePath();ctx.fill();
+  // neck
+  ctx.fillStyle=SKIN_SH;ctx.fillRect(cx-W*0.075*sc,H*0.56,W*0.15*sc,H*0.14);
+  // head
+  ctx.fillStyle=SKIN;ctx.beginPath();ctx.ellipse(cx,hy,hr,hrY,0,0,Math.PI*2);ctx.fill();
+  // beard shading (father)
+  if(cfg.beard){ctx.save();ctx.beginPath();ctx.ellipse(cx,hy+hr*0.5,hr*0.92,hrY*0.72,0,0,Math.PI*2);ctx.clip();
+    ctx.fillStyle=cfg.hair;ctx.globalAlpha=.5;ctx.fillRect(cx-hr,hy,hr*2,hrY);ctx.restore();}
+  // face
+  ctx.fillStyle="#3a2c22";const ey=hy-hr*0.05,ex=hr*0.42,er=Math.max(1.2,W*0.016);
+  ctx.beginPath();ctx.arc(cx-ex,ey,er,0,Math.PI*2);ctx.arc(cx+ex,ey,er,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle="#8a5a44";ctx.lineWidth=Math.max(1.2,W*0.012);ctx.lineCap="round";
+  ctx.beginPath();ctx.arc(cx,hy+hr*0.36,hr*0.34,0.15*Math.PI,0.85*Math.PI);ctx.stroke();
+  // hair front per style
+  ctx.fillStyle=cfg.hair;
+  if(cfg.style==="short"){ctx.beginPath();ctx.ellipse(cx,hy-hr*0.42,hr*1.03,hrY*0.62,0,Math.PI,0);ctx.fill();
+    ctx.fillRect(cx-hr*1.02,hy-hr*0.5,hr*0.22,hrY*0.8);ctx.fillRect(cx+hr*0.8,hy-hr*0.5,hr*0.22,hrY*0.8);}
+  else if(cfg.style==="long"){ctx.beginPath();ctx.ellipse(cx,hy-hr*0.4,hr*1.06,hrY*0.66,0,Math.PI,0);ctx.fill();}
+  else{ // girls: rounded top + pony/pig
+    ctx.beginPath();ctx.ellipse(cx,hy-hr*0.44,hr*1.0,hrY*0.6,0,Math.PI,0);ctx.fill();
+    if(cfg.style==="pony"){ctx.beginPath();ctx.arc(cx+hr*1.05,hy-hr*0.4,hr*0.34,0,Math.PI*2);ctx.fill();}
+    else{ctx.beginPath();ctx.arc(cx-hr*1.05,hy+hr*0.05,hr*0.32,0,Math.PI*2);ctx.arc(cx+hr*1.05,hy+hr*0.05,hr*0.32,0,Math.PI*2);ctx.fill();}}
+}
+function frameInner(fr){return fr.querySelector(".pcv");}
+function drawAllPortraits(){
+  document.querySelectorAll("#wallStage .frame").forEach((fr,i)=>{
+    const role=ROLES[i].id;if(WALL.photos[role]){return;}
+    const cv=frameInner(fr);const ctx=fit(cv);drawPortrait(ctx,cv.width,cv.height,role);});
+}
+
+/* ---- wall scoring ---- */
+function wallScore(F){
+  const S=WU.S,half=S/2;
+  const cx=F.reduce((a,f)=>a+f.x,0)/4, cy=F.reduce((a,f)=>a+f.y,0)/4;
+  const minX=Math.min(...F.map(f=>f.x-half)),maxX=Math.max(...F.map(f=>f.x+half));
+  const minY=Math.min(...F.map(f=>f.y-half)),maxY=Math.max(...F.map(f=>f.y+half));
+  const bw=maxX-minX,bh=maxY-minY;
+  let overlap=false,gaps=[];
+  for(let i=0;i<4;i++){let ng=1e9;for(let j=0;j<4;j++){if(i===j)continue;
+    const gap=Math.max(Math.abs(F[i].x-F[j].x),Math.abs(F[i].y-F[j].y))-S;if(gap<-0.5)overlap=true;ng=Math.min(ng,gap);}gaps.push(ng);}
+  const meanGap=gaps.reduce((a,b)=>a+b,0)/4, gapStd=Math.sqrt(gaps.reduce((a,b)=>a+(b-meanGap)**2,0)/4);
+  let aligned=0;for(let i=0;i<4;i++)for(let j=i+1;j<4;j++){if(Math.abs(F[i].x-F[j].x)<2||Math.abs(F[i].y-F[j].y)<2)aligned++;}
+  const band=(v,lo,hi)=> v<lo?Math.max(0,1-(lo-v)/Math.max(lo,1)):v>hi?Math.max(0,1-(v-hi)/Math.max(hi,1)):1;
+  const spread=F.reduce((a,f)=>a+Math.hypot(f.x-cx,f.y-cy),0)/4;
+  const strongCenter=clamp01(1-Math.abs(spread-15)/16);
+  const positive=overlap?0.15:band(meanGap,2,9)*(1-clamp01(gapStd/6));
+  const mL=minX,mR=WU.W-maxX,mT=minY,mB=CONSOLE.top-maxY;
+  const breathing=(band(mL,7,26)+band(mR,7,26)+band(mT,5,24)+band(mB,3,14))/4;
+  const leftN=F.filter(f=>f.x<50).length,rightN=4-leftN;
+  const balance=clamp01(1-Math.abs(cx-50)/16)*0.65+clamp01(1-Math.abs(leftN-rightN)/2)*0.35;
+  const centerOver=clamp01(1-Math.abs(cx-CONSOLE.cx)/14), goodHeight=band(mB,3,13);
+  const notSep=0.6*centerOver+0.4*goodHeight;
+  const fill=(4*S*S)/Math.max(1,bw*bh);
+  const goodShape=clamp01((fill-0.28)/0.55)*0.7+clamp01(aligned/4)*0.3;
+  const alignment=clamp01(aligned/4);
+  const subs={strongCenter,positive,breathing,balance,notSep,goodShape,alignment};
+  const life=0.20*notSep+0.16*strongCenter+0.15*positive+0.12*balance+0.12*breathing+0.13*goodShape+0.12*alignment;
+  let label="unsettled";if(life>=0.72)label="at home";else if(life>=0.55)label="coming together";else if(life>=0.35)label="finding order";
+  const geo={overlap,cx,cy,mL,mR,mT,mB,meanGap,gapStd,aligned,spread,fill};
+  return {life:clamp01(life),label,subs,geo};}
+
+function scoreBand(v){return v>=0.72?"good":v>=0.45?"mid":"bad";}
+
+function buildWall(){
+  const stage=document.getElementById("wallStage");
+  ROLES.forEach((r,i)=>{
+    const fr=document.createElement("div");fr.className="frame";fr.dataset.i=i;
+    fr.innerHTML=`<canvas class="pcv"></canvas><img class="pimg" hidden alt="">
+      <div class="plate" contenteditable="true" spellcheck="false">${r.name}</div>
+      <button class="upl" title="Use a photo" aria-label="Use a photo">⌖</button>
+      <input type="file" accept="image/*" hidden>`;
+    stage.appendChild(fr);
+    const plate=fr.querySelector(".plate");
+    plate.addEventListener("pointerdown",e=>e.stopPropagation());
+    const upl=fr.querySelector(".upl"),inp=fr.querySelector("input");
+    upl.addEventListener("pointerdown",e=>e.stopPropagation());
+    upl.addEventListener("click",e=>{e.stopPropagation();inp.click();});
+    inp.addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+      rd.onload=()=>{const img=fr.querySelector(".pimg");img.src=rd.result;img.hidden=false;fr.classList.add("has-photo");WALL.photos[r.id]=rd.result;};rd.readAsDataURL(f);});
+    fr.addEventListener("pointerdown",e=>onFrameDown(e,i,fr));
+  });
+  buildWallPrinciples();
+  applyPreset("salon");
+  requestAnimationFrame(()=>{layoutWall();drawAllPortraits();scoreWall();});
+}
+function buildWallPrinciples(){
+  const el=document.getElementById("wpList");el.innerHTML="";
+  WALL_PRINCIPLES.forEach(p=>{const b=document.createElement("button");b.className="wprow";b.dataset.key=p.key;
+    b.innerHTML=`<span><span class="wpn">${p.name}</span><br><span class="wpsub">${p.sub}</span></span><span class="wsc">—</span>`;
+    b.onclick=()=>{WALL.sel=p.key;renderWallReading();markWallPrinciples();};el.appendChild(b);});
+}
+function layoutWall(){
+  const S=WU.S,half=S/2;
+  document.querySelectorAll("#wallStage .frame").forEach((fr,i)=>{
+    const f=WALL.frames[i];
+    fr.style.left=(f.x-half)+"%";fr.style.top=((f.y-half)*100/WU.H)+"%";
+    fr.style.width=S+"%";fr.style.height=(S*100/WU.H)+"%";
+    const stageW=document.getElementById("wallStage").clientWidth;fr.style.borderWidth=Math.max(3,stageW*0.011)+"px";});
+}
+function applyPreset(name){WALL.frames=PRESETS[name].map(p=>({x:p.x,y:p.y}));layoutWall();scoreWall();
+  toast(name==="scatter"?"A scattered wall — feel how it refuses to settle.":`Arranged: ${name}.`);}
+
+/* ---- drag ---- */
+let drag=null;
+function stageUnits(e){const st=document.getElementById("wallStage").getBoundingClientRect();
+  return{x:(e.clientX-st.left)/st.width*WU.W,y:(e.clientY-st.top)/st.height*WU.H};}
+function onFrameDown(e,i,fr){e.preventDefault();const u=stageUnits(e),f=WALL.frames[i];
+  drag={i,fr,dx:u.x-f.x,dy:u.y-f.y};fr.classList.add("drag");fr.setPointerCapture(e.pointerId);
+  fr.addEventListener("pointermove",onFrameMove);fr.addEventListener("pointerup",onFrameUp);fr.addEventListener("pointercancel",onFrameUp);}
+function onFrameMove(e){if(!drag)return;const half=WU.S/2,u=stageUnits(e);
+  let nx=u.x-drag.dx, ny=u.y-drag.dy;
+  nx=Math.max(half,Math.min(WU.W-half,nx));ny=Math.max(half,Math.min(WU.H-half,ny));
+  let gv=null,gh=null;
+  if(WALL.snap){const tol=1.9;const xs=[CONSOLE.cx],ys=[];
+    WALL.frames.forEach((f,j)=>{if(j!==drag.i){xs.push(f.x);ys.push(f.y);}});
+    for(const c of xs)if(Math.abs(nx-c)<tol){nx=c;gv=c;break;}
+    for(const c of ys)if(Math.abs(ny-c)<tol){ny=c;gh=c;break;}}
+  WALL.frames[drag.i]={x:nx,y:ny};
+  const half2=WU.S/2;drag.fr.style.left=(nx-half2)+"%";drag.fr.style.top=((ny-half2)*100/WU.H)+"%";
+  showGuide("V",gv);showGuide("H",gh);
+  if(!drag.raf){drag.raf=true;requestAnimationFrame(()=>{if(drag)drag.raf=false;scoreWall();});}}
+function onFrameUp(e){if(!drag)return;drag.fr.classList.remove("drag");
+  drag.fr.removeEventListener("pointermove",onFrameMove);drag.fr.removeEventListener("pointerup",onFrameUp);
+  showGuide("V",null);showGuide("H",null);drag=null;scoreWall();}
+function showGuide(axis,coord){const g=document.getElementById(axis==="V"?"guideV":"guideH");
+  if(coord==null){g.classList.remove("show");return;}
+  if(axis==="V")g.style.left=coord+"%";else g.style.top=(coord*100/WU.H)+"%";g.classList.add("show");}
+
+/* ---- wall reading ---- */
+function scoreWall(){
+  const R=wallScore(WALL.frames);WALL.last=R;
+  const tag=document.getElementById("wallTag");tag.textContent=R.label;tag.classList.toggle("alive",R.life>=0.72);
+  markWallPrinciples();renderWallReading();}
+function markWallPrinciples(){
+  const R=WALL.last;if(!R)return;
+  document.querySelectorAll(".wprow").forEach(b=>{const k=b.dataset.key,v=R.subs[k],band=scoreBand(v);
+    b.classList.remove("good","mid","bad","sel");b.classList.add(band);if(WALL.sel===k)b.classList.add("sel");
+    b.querySelector(".wsc").textContent=Math.round(v*100);});}
+function renderWallReading(){
+  const el=document.getElementById("wallReading");const R=WALL.last;if(!R){el.innerHTML=wallIntroHTML();return;}
+  const lifePct=Math.round(R.life*100);
+  // weakest principle => top tip
+  let worst=null,wv=2;WALL_PRINCIPLES.forEach(p=>{const v=R.subs[p.key];if(v<wv){wv=v;worst=p;}});
+  const tip= R.life>=0.85 ? "This wall is at home — centred, balanced, and belonging to the room below it." : worst.tip(R.geo);
+  el.classList.toggle("at-home",R.life>=0.72);
+  let detail="";
+  if(WALL.sel&&WP[WALL.sel]){const p=WP[WALL.sel];detail=`<div class="wp-detail"><div class="lbl">Principle · ${Math.round(R.subs[p.key]*100)}%</div>
+    <h4>${p.name}</h4><p>${p.def}</p><p style="color:var(--life)"><b>Now:</b> ${p.tip(R.geo)}</p></div>`;}
+  el.innerHTML=`
+    <div class="meter"><div class="mlabel"><span>Degree of life</span><span><span class="lifelabel ${R.life>=0.72?"alive":""}">${R.label}</span> <span class="mval">${lifePct}%</span></span></div>
+      <div class="lifebar"><span style="width:${lifePct}%"></span></div></div>
+    <div class="top-tip"><span class="lbl">${R.life>=0.85?"At home":"Try this"}</span>${tip}</div>
+    <p style="color:var(--ink-soft);font-size:.88rem;line-height:1.5">These are your people — <em>Things From Your Life</em> (Pattern 253). The wall isn't decoration to fill space; it becomes alive when the group finds a centre, breathes, and belongs to the room. Drag the portraits, or tap a principle to focus on it.</p>
+    ${detail}`;}
+function wallIntroHTML(){return `<div class="wr-open"><p class="lead">Four portraits — two parents, two girls — waiting for their place on the wall.</p>
+  <p>Arrange them by the same principles that make any whole come alive. A calm, centred cluster that belongs to the console below will feel more alive than a wall of scattered frames.</p></div>`;}
+
+/* ============ TABS ============ */
+function setTab(t){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("on",b.dataset.tab===t));
+  document.getElementById("studyWrap").style.display=t==="study"?"":"none";
+  document.getElementById("trainWrap").classList.toggle("on",t==="train");
+  document.getElementById("wallWrap").classList.toggle("on",t==="wall");
+  if(t==="study"){renderSpecimen();renderReader();}
+  if(t==="train"){if(!tRound)newRound();else document.querySelectorAll(".spec-choice canvas").forEach((c,i)=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));}
+  if(t==="wall"){requestAnimationFrame(()=>{layoutWall();drawAllPortraits();scoreWall();});}
+}
+
+/* ============ TOAST / OVERLAY ============ */
+let toastT;function toast(m){const t=document.getElementById("toast");t.innerHTML=m;t.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove("show"),2800);}
+function openOverlay(){document.getElementById("overlay").classList.add("show");}
+function closeOverlay(){document.getElementById("overlay").classList.remove("show");}
+function showHow(){const m=document.getElementById("modal");m.className="modal";
+  m.innerHTML=`<p class="eyebrow">How to play</p><h2>Compose a living whole — three ways.</h2>
+    <ol>
+      <li><b>Compose life.</b> Tune the fifteen properties on a Persian carpet. Life is a <em>balance</em>, not a total — pile on ornament with no void or calm and it turns <span style="color:var(--clay)">crowded</span>.</li>
+      <li><b>Train the eye.</b> Shown two carpets, choose the one with more life. Often it is the simpler one.</li>
+      <li><b>Family wall.</b> Drag four family portraits above the console. The same principles judge the arrangement — a centred, breathing cluster that belongs to the furniture beats a scattered wall. Tap a picture's ⌖ to swap in a real photo, or its label to rename.</li>
+    </ol>
+    <p style="font-style:italic">Everything here is one idea: wholeness. It is the same in a carpet and on your own wall.</p>
+    <button class="start" id="closeHow">Begin</button>`;
+  openOverlay();document.getElementById("closeHow").onclick=closeOverlay;}
+function showWin(){const m=document.getElementById("modal");m.className="modal win";const L=computeLife(state);
+  m.innerHTML=`<div class="bloom">❧ ✦ ❧</div><p class="eyebrow" style="text-align:center">The phenomenon of life</p>
+    <h2 style="text-align:center">It has come alive.</h2>
+    <p style="text-align:center">You reached <b>${Math.round(L.life*100)}% life</b> — not by adding everything, but by letting the whole breathe. This is what Alexander means by <b>wholeness</b>.</p>
+    <p style="text-align:center;font-style:italic;color:var(--ink-faint)">“The degree of life is a real, objective quality of things.”</p>
+    <button class="start" id="closeWin">Contemplate it</button>`;
+  openOverlay();document.getElementById("closeWin").onclick=closeOverlay;}
+
+function toggleTheme(){const root=document.documentElement;const cur=root.getAttribute("data-theme");
+  const sysDark=matchMedia("(prefers-color-scheme:dark)").matches;const now=cur||(sysDark?"dark":"light");
+  root.setAttribute("data-theme",now==="dark"?"light":"dark");
+  if(document.getElementById("wallWrap").classList.contains("on"))requestAnimationFrame(()=>{layoutWall();drawAllPortraits();});}
+
+/* ============ WIRING ============ */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+document.getElementById("howBtn").onclick=showHow;
+document.getElementById("themeBtn").onclick=toggleTheme;
+document.getElementById("allBtn2").onclick=applyAll;
+document.getElementById("clearBtn").onclick=clearAll;
+document.getElementById("surpriseBtn").onclick=surprise;
+document.getElementById("paletteSel").onchange=e=>{state.palette=e.target.value;renderSpecimen();renderReader();};
+const cmpBtn=document.getElementById("compareBtn");
+const startCmp=e=>{e.preventDefault();comparing=true;renderSpecimen();};
+const endCmp=()=>{if(comparing){comparing=false;renderSpecimen();}};
+cmpBtn.addEventListener("mousedown",startCmp);cmpBtn.addEventListener("touchstart",startCmp,{passive:false});
+["mouseup","mouseleave","touchend","touchcancel"].forEach(ev=>cmpBtn.addEventListener(ev,endCmp));
+document.querySelectorAll("[data-choose]").forEach(b=>b.onclick=()=>choose(+b.dataset.choose));
+document.querySelectorAll(".spec-choice canvas").forEach(c=>c.onclick=()=>{if(!tAnswered)choose(+c.dataset.c);});
+document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
+document.getElementById("snapBtn").onclick=e=>{WALL.snap=!WALL.snap;e.target.textContent="Snap: "+(WALL.snap?"on":"off");e.target.classList.toggle("act",WALL.snap);};
+document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeOverlay();};
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOverlay();});
+let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>{
+  renderSpecimen();if(selected)renderReader();
+  if(tRound&&document.getElementById("trainWrap").classList.contains("on"))document.querySelectorAll(".spec-choice canvas").forEach((c,i)=>drawCarpet(fit(c),c.width,c.height,tRound.states[i]));
+  if(document.getElementById("wallWrap").classList.contains("on")){layoutWall();drawAllPortraits();}
+},160);});
+
+/* ============ INIT ============ */
+function init(){
+  buildList();buildDots();buildPalettes();buildWall();
+  document.getElementById("reader").innerHTML=introHTML();document.getElementById("reader").classList.add("intro");
+  renderMeters();
+  requestAnimationFrame(()=>{renderSpecimen();selected=1;renderReader();markList();});
+  showHow();
+}
+init();
+</script>
