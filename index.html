@@ -809,12 +809,12 @@ const SLIDERS=[
  {key:"order",snm:"Ordine",lo:"organic",hi:"aliniat"},
 ];
 const PRESETS={
- salon:{f:"group",tight:0.62,sym:0.72,breath:0.45,order:0.55},
- grid: {f:"group",tight:0.62,sym:0.9,breath:0.5,order:0.96},
- row:  {f:"row",tight:0.5,sym:0.82,breath:0.5,order:0.9},
- rowscatter:{f:"row",tight:0.5,sym:0.32,breath:0.45,order:0.22},
- airy: {f:"group",tight:0.4,sym:0.72,breath:0.86,order:0.62},
- scatter:{f:"group",tight:0.32,sym:0.2,breath:0.4,order:0.12},
+ salon:{st:"cluster",tight:0.55,sym:0.62,breath:0.45,order:0.62,seed:7},
+ grid: {st:"rows",tight:0.62,sym:0.9,breath:0.5,order:0.96,seed:1},
+ row:  {st:"line",tight:0.5,sym:0.7,breath:0.45,order:0.68,seed:3},
+ rowscatter:{st:"scatter",tight:0.5,sym:0.35,breath:0.5,order:0.3,seed:11},
+ airy: {st:"cluster",tight:0.4,sym:0.62,breath:0.85,order:0.58,seed:5},
+ scatter:{st:"scatter",tight:0.4,sym:0.24,breath:0.5,order:0.18,seed:23},
 };
 const PRESET_LABEL={salon:"Grup salon",grid:"Grilă uniformă",row:"Rând",rowscatter:"Rând organic",airy:"Aerisit",scatter:"Împrăștiat"};
 const DECOS=[
@@ -825,8 +825,8 @@ const DECOS=[
  {key:"mantel",name:"Obiecte pe consolă",pat:"Lucruri din viața ta · 253"},
  {key:"warm",name:"Pereți calzi",pat:"Culori calde · 250"},
 ];
-const WALL={snap:true,sel:null,photos:{},format:"group",
-  sliders:{tight:0.62,sym:0.72,breath:0.45,order:0.55},
+const WALL={snap:true,sel:null,photos:{},style:"cluster",seed:7,
+  sliders:{tight:0.55,sym:0.62,breath:0.45,order:0.62},
   deco:{light:false,sconce:false,string:false,plant:false,mantel:false,warm:false},last:null};
 function presentItems(){return ITEMS.filter(i=>i.present);}
 const SKIN="#E3B892",SKIN_SH="#cf9f78";
@@ -1073,39 +1073,64 @@ function layoutWall(){
     fr.style.borderWidth=Math.max(2,stageW*0.009*(s/17)+1)+"px";});
 }
 /* parametric composer — the five sliders generate the arrangement */
-/* justified-row packing — a real gallery-wall look that respects each frame's size */
+/* layout dispatcher — several composition styles, all with the family central */
 function layoutFromParams(apply){
   const its=presentItems(),N=its.length;if(!N){return;}
   const s=WALL.sliders;
   its.forEach(i=>{i.size=i.base;});                 // portraits matched; small pieces keep their own scale
-  const gap=lerp(5.6,1.9,s.tight);
-  const usable=WU.W-13;
-  const targetW=WALL.format==="row"?1e5:lerp(usable*0.78,usable*0.40,s.breath);
-  // pack into justified rows, family first then the smaller pieces
+  if(WALL.style==="rows") layoutRows(its,s);
+  else layoutCluster(its,s,WALL.style,(WALL.seed>>>0)||1);
+  its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
+  if(apply!==false)layoutWall();
+}
+/* justified rows — the tidy, orderly look */
+function layoutRows(its,s){
+  const gap=lerp(5.6,1.9,s.tight), usable=WU.W-13, targetW=lerp(usable*0.78,usable*0.40,s.breath);
   const rows=[];let cur=[],curW=0;
   for(const it of its){const add=(cur.length?gap:0)+it.size;
     if(cur.length&&curW+add>targetW){rows.push(cur);cur=[];curW=0;}
     cur.push(it);curW+=(cur.length>1?gap:0)+it.size;}
   if(cur.length)rows.push(cur);
-  // Simetrie high → arrange each row big-in-the-middle so weight is balanced
   if(s.sym>0.5)rows.forEach(r=>{if(r.length>2){const desc=r.slice().sort((a,b)=>b.size-a.size),res=[];
     desc.forEach((it,i)=>i%2===0?res.push(it):res.unshift(it));r.length=0;r.push(...res);}});
   const rowH=rows.map(r=>Math.max(...r.map(i=>i.size))),vGap=gap;
   const totalH=rowH.reduce((a,b)=>a+b,0)+vGap*(rows.length-1);
-  const bottomMargin=lerp(5,12,s.breath);
-  let y=Math.max(4,CONSOLE.top-bottomMargin-totalH);
+  let y=Math.max(4,CONSOLE.top-lerp(5,12,s.breath)-totalH);
   const rng=mulberry32(4242);
   rows.forEach((r,ri)=>{const rh=rowH[ri],rw=r.reduce((a,i)=>a+i.size,0)+gap*(r.length-1);
     let x=50-rw/2;const cy=y+rh/2;
-    r.forEach(it=>{it.x=x+it.size/2;
-      const slack=(rh-it.size)/2;
-      it.y=cy+(1-s.order)*(rng()*2-1)*Math.min(rh*0.16,slack+0.8);
-      x+=it.size+gap;});
+    r.forEach(it=>{it.x=x+it.size/2;const slack=(rh-it.size)/2;
+      it.y=cy+(1-s.order)*(rng()*2-1)*Math.min(rh*0.16,slack+0.8);x+=it.size+gap;});
     y+=rh+vGap;});
-  its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
-  if(apply!==false)layoutWall();
 }
-function applyPreset(name){const p=PRESETS[name];WALL.format=p.f;
+/* bold cluster — family as a central anchor (block or line) with the smaller pieces
+   scattered around it like a real salon wall. style: cluster | line | scatter */
+function layoutCluster(its,s,style,seed){
+  const rng=mulberry32(seed);
+  const ports=its.filter(i=>i.kind==="portrait"), smalls=its.filter(i=>i.kind!=="portrait");
+  const ps=ports.length?Math.max(...ports.map(p=>p.size)):16.5;
+  const pg=lerp(5,1.2,s.tight);
+  let cols,rows;
+  if(style==="line"){cols=Math.max(1,ports.length);rows=1;}
+  else{cols=2;rows=Math.max(1,Math.ceil(ports.length/2));}
+  const stepX=ps+pg,stepY=ps+pg,bw=(cols-1)*stepX,bh=(rows-1)*stepY;
+  const spread=style==="scatter"?1.42:1.0, cx=50;
+  const cy=(5+(CONSOLE.top-lerp(5,11,s.breath)))/2;
+  const jamp=(1-s.order)*ps*(style==="scatter"?0.42:0.16);
+  ports.forEach((it,i)=>{const r=Math.floor(i/cols),c=i%cols;
+    it.x=cx-bw/2+c*stepX+(rng()*2-1)*jamp; it.y=cy-bh/2+r*stepY+(rng()*2-1)*jamp;});
+  const hx=bw/2+ps/2, hy=bh/2+ps/2, n=smalls.length||1, a0=rng()*Math.PI*2;
+  const gm=lerp(2.5,7,s.breath)*spread;
+  smalls.forEach((it,k)=>{
+    const ang=a0+(k/n)*Math.PI*2+(rng()*2-1)*(style==="scatter"?0.5:0.2);
+    const c=Math.cos(ang), sn=Math.sin(ang);
+    const edge=Math.min(hx/(Math.abs(c)+0.05), hy/(Math.abs(sn)+0.05));   // reach to block edge along this angle
+    const rad=edge+it.size*0.55+gm+(style==="scatter"?rng()*5:rng()*1.5);
+    it.x=cx+c*rad; it.y=cy+sn*rad;});
+  if(s.sym>0.55){const tw=its.reduce((a,i)=>a+i.size,0),wcx=its.reduce((a,i)=>a+i.x*i.size,0)/tw;its.forEach(i=>i.x+=(50-wcx)*0.7);}
+  else{const wcx=its.reduce((a,i)=>a+i.x,0)/its.length;its.forEach(i=>i.x+=50-wcx);}
+}
+function applyPreset(name){const p=PRESETS[name];WALL.style=p.st;WALL.seed=p.seed;
   ["tight","sym","breath","order"].forEach(k=>WALL.sliders[k]=p[k]);
   syncSliders();layoutFromParams();scoreWall();updateHash();
   toast(name==="scatter"?"Un perete împrăștiat — simte cum refuză să se așeze.":`Aranjat: ${PRESET_LABEL[name]||name}.`);}
@@ -1113,30 +1138,38 @@ function applyPreset(name){const p=PRESETS[name];WALL.format=p.f;
 /* auto-compose: search slider space (+ format + a tasteful decoration set)
    to push the degree of life as high as possible for the present items */
 function evalLife(){layoutFromParams(false);return wallScore().life;}
+/* bold auto-compose: explore daring styles (creative clusters, lines, scattered
+   grids) with random seeds, keep the top few by life, and pick among them at
+   random so every tap gives a fresh, courageous composition — not the tame optimum */
 function autoCompose(){
   const keys=["tight","sym","breath","order"];
-  const formats=presentItems().length<=4?["group","row"]:["group"];
-  let bestCfg=null,bestFmt="group",bestLife=-1;
-  for(let iter=0;iter<180;iter++){
-    const fmt=formats[Math.floor(Math.random()*formats.length)];WALL.format=fmt;
+  const styles=["cluster","cluster","cluster","scatter","scatter","line","rows"]; // weighted toward bold
+  const cands=[];
+  for(let i=0;i<60;i++){
+    const st=styles[Math.floor(Math.random()*styles.length)];
+    const seed=1+Math.floor(Math.random()*99999);
+    WALL.style=st;WALL.seed=seed;
     keys.forEach(k=>WALL.sliders[k]=Math.random());
-    const L=evalLife();if(L>bestLife){bestLife=L;bestCfg={...WALL.sliders};bestFmt=fmt;}
+    if(Math.random()<0.6)WALL.sliders.order=Math.random()*0.5;   // lean organic/bold
+    if(Math.random()<0.5)WALL.sliders.tight=0.45+Math.random()*0.5;
+    const L=evalLife();
+    cands.push({st,seed,sl:{...WALL.sliders},L});
   }
-  WALL.format=bestFmt;keys.forEach(k=>WALL.sliders[k]=bestCfg[k]);
-  let improved=true,passes=0;
-  while(improved&&passes<7){improved=false;passes++;
-    for(const k of keys)for(const dl of [0.09,-0.09,0.04,-0.04]){
-      const old=WALL.sliders[k];WALL.sliders[k]=clamp(old+dl,0,1);
-      const L=evalLife();if(L>bestLife+0.0008){bestLife=L;improved=true;}else WALL.sliders[k]=old;}
-  }
-  // pick a decoration set that adds warmth without clutter
-  const decoSets=[{},{light:1,plant:1,warm:1},{light:1,plant:1},{light:1,warm:1,mantel:1},{light:1,sconce:1,string:1,plant:1,mantel:1,warm:1}];
+  // best candidate per style, then pick a bold style at random → variety every tap
+  const byStyle={};cands.forEach(c=>{if(!byStyle[c.st]||c.L>byStyle[c.st].L)byStyle[c.st]=c;});
+  const boldStyles=["cluster","scatter","line"].filter(st=>byStyle[st]&&byStyle[st].L>0.45);
+  const chosenStyle=(boldStyles.length?boldStyles:Object.keys(byStyle))[Math.floor(Math.random()*(boldStyles.length||Object.keys(byStyle).length))];
+  const pick=byStyle[chosenStyle];
+  WALL.style=pick.st;WALL.seed=pick.seed;keys.forEach(k=>WALL.sliders[k]=pick.sl[k]);
+  // a tasteful decoration set that adds warmth without clutter
+  const decoSets=[{light:1,plant:1,warm:1},{light:1,plant:1},{light:1,warm:1,mantel:1},{light:1,sconce:1,plant:1}];
   let bestDeco={...WALL.deco},bdl=-1;
   decoSets.forEach(ds=>{for(const k in WALL.deco)WALL.deco[k]=!!ds[k];const L=evalLife();if(L>bdl){bdl=L;bestDeco={...WALL.deco};}});
   for(const k in WALL.deco)WALL.deco[k]=bestDeco[k];
   syncSliders();syncDecoControls();
   layoutFromParams();drawAllPortraits();scoreWall();updateHash();
-  toast(`Compus automat — <b>${Math.round(WALL.last.life*100)}% viață</b> (${WALL.last.label}).`);
+  const styleName={cluster:"grup creativ",scatter:"împrăștiat",line:"în linie",rows:"pe rânduri"}[pick.st]||"";
+  toast(`Compus — <b>${Math.round(WALL.last.life*100)}% viață</b> · ${styleName}.`);
 }
 
 /* ---- drag (fine-tune; a slider move re-composes) ---- */
@@ -1202,7 +1235,7 @@ function encodeState(){
   const o={t:curTab};
   if(curTab==="study"){o.p=state.palette;o.c={};
     PROPS.forEach(pp=>{const pr=state.props[pp.n];if(pr.on)o.c[pp.n]=(CONTROLS[pp.n]||[]).map(cc=>+(+pr[cc.k]).toFixed(3));});}
-  else if(curTab==="wall"){o.fmt=WALL.format;
+  else if(curTab==="wall"){o.st=WALL.style;o.sd=WALL.seed;
     o.sl=SLIDERS.map(s=>+WALL.sliders[s.key].toFixed(2));
     o.it=ITEMS.filter(i=>i.present).map(i=>i.id);
     o.n=ITEMS.filter(i=>i.present).map(i=>(i.name||"").trim().slice(0,18));
@@ -1220,7 +1253,7 @@ function applyState(str){
     document.getElementById("paletteSel").value=state.palette;hasBeenAlive=computeLife(state).life>=0.72;
     setTab("study");renderSpecimen();renderMeters();renderReader();markList();return true;}
   if(o.t==="wall"){
-    if(o.fmt)WALL.format=o.fmt;
+    WALL.style=o.st||"cluster";WALL.seed=o.sd||1;
     if(Array.isArray(o.sl))SLIDERS.forEach((s,i)=>{if(o.sl[i]!=null)WALL.sliders[s.key]=o.sl[i];});
     if(Array.isArray(o.it))ITEMS.forEach(it=>{it.present=it.kind==="portrait"?true:o.it.includes(it.id);});
     if(o.s!=null){WALL.snap=!!o.s;const sb=document.getElementById("snapBtn");if(sb){sb.textContent="Aliniere: "+(WALL.snap?"pornit":"oprit");sb.classList.toggle("act",WALL.snap);}}
