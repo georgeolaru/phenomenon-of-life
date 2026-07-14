@@ -251,7 +251,7 @@
   .frame.kclock{border-color:#3d342a}
   .frame:active{cursor:grabbing}
   .frame.drag{box-shadow:0 12px 26px rgba(30,20,8,.4);z-index:6;transition:box-shadow .12s}
-  .frame .pcv{position:absolute;inset:0;width:100%;height:100%;display:block;background:#e7dcc0}
+  .frame .pcv{position:absolute;inset:0;width:100%;height:100%;display:block;background:#e7dcc0;pointer-events:none}
   .frame .plate{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
     text-align:center;color:#f3ecda;background:linear-gradient(180deg,transparent,rgba(20,12,4,.62));padding:8px 2px 3px;outline:none}
   .frame .plate:focus{background:linear-gradient(180deg,transparent,rgba(20,12,4,.8))}
@@ -1237,7 +1237,8 @@ let drag=null;
 function stageUnits(e){const st=document.getElementById("wallStage").getBoundingClientRect();
   return{x:(e.clientX-st.left)/st.width*WU.W,y:(e.clientY-st.top)/st.height*WU.H};}
 function onFrameDown(e,i,fr){e.preventDefault();const u=stageUnits(e),it=ITEMS[i];
-  drag={i,fr,dx:u.x-it.x,dy:u.y-it.y};fr.classList.add("drag");fr.setPointerCapture(e.pointerId);
+  drag={i,fr,dx:u.x-it.x,dy:u.y-it.y};fr.classList.add("drag");
+  try{fr.setPointerCapture(e.pointerId);}catch(_){}
   fr.addEventListener("pointermove",onFrameMove);fr.addEventListener("pointerup",onFrameUp);fr.addEventListener("pointercancel",onFrameUp);}
 function onFrameMove(e){if(!drag)return;const it=ITEMS[drag.i],half=it.size/2,u=stageUnits(e);
   let nx=clamp(u.x-drag.dx,half,WU.W-half),ny=clamp(u.y-drag.dy,half,WU.H-half),gv=null,gh=null;
@@ -1409,11 +1410,14 @@ let rt;window.addEventListener("resize",()=>{clearTimeout(rt);rt=setTimeout(()=>
 
 /* ============ INIT ============ */
 function init(){
+  // citește hash-ul PRIMUL — presetul implicit din buildWall ar suprascrie URL-ul primit
+  const savedHash=location.hash.length>2?location.hash.slice(1):null;
   buildList();buildDots();buildPalettes();buildWall();
   document.getElementById("reader").innerHTML=introHTML();document.getElementById("reader").classList.add("intro");
   selected=1;renderMeters();markList();
-  const shared=location.hash.length>2 && applyState(location.hash.slice(1));
-  if(!shared){ setTab("wall"); requestAnimationFrame(()=>{renderReader();updateHashNow();}); showHow(); }
+  const shared=savedHash?applyState(savedHash):false;
+  if(shared){ requestAnimationFrame(()=>requestAnimationFrame(updateHashNow)); }
+  else{ setTab("wall"); requestAnimationFrame(()=>{renderReader();updateHashNow();}); showHow(); }
   window.addEventListener("hashchange",()=>applyState(location.hash.slice(1)));
 }
 init();
