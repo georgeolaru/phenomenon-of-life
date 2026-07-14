@@ -222,11 +222,17 @@
   .wprow.good .wsc{color:var(--life)} .wprow.mid .wsc{color:var(--gold)} .wprow.bad .wsc{color:var(--clay)}
   .wall-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--line);color:var(--ink-soft)}
   .wall-tag.alive{background:var(--life-glow);color:var(--life)}
-  .wall-stage-wrap{display:grid;place-items:center;padding:clamp(10px,3vw,22px)}
-  .wall-stage{position:relative;width:min(100%,calc(74vh * 4 / 3));aspect-ratio:4/3;border-radius:4px;overflow:hidden;
+  .wall-pct{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
+  .wall-pct.alive{color:var(--life)}
+  .wall-stage-wrap{display:grid;place-items:center;padding:0}
+  .wall-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:0;overflow:hidden;
     background:linear-gradient(178deg,color-mix(in srgb,var(--panel-2) 82%,#fff),var(--panel-2));
-    box-shadow:inset 0 0 70px rgba(0,0,0,.06),0 1px 0 var(--shadow);border:1px solid var(--line);
+    box-shadow:inset 0 0 70px rgba(0,0,0,.06),0 1px 0 var(--shadow);border:1px solid var(--line);border-left:none;border-right:none;
     touch-action:none;user-select:none;-webkit-user-select:none}
+  @media (min-width:680px){
+    .wall-stage-wrap{padding:clamp(10px,3vw,22px)}
+    .wall-stage{width:min(100%,calc(74vh * 4 / 3));border-radius:4px;border:1px solid var(--line)}
+  }
   .wall-stage::after{content:"";position:absolute;left:0;right:0;bottom:0;height:9%;
     background:color-mix(in srgb,var(--ink) 8%,transparent);border-top:1px solid var(--line)}
   .console{position:absolute;left:27%;width:46%;bottom:2%;height:15%;border-radius:4px 4px 3px 3px;z-index:1;
@@ -242,16 +248,10 @@
   .frame:active{cursor:grabbing}
   .frame.drag{box-shadow:0 12px 26px rgba(30,20,8,.4);z-index:6;transition:box-shadow .12s}
   .frame .pcv{position:absolute;inset:0;width:100%;height:100%;display:block;background:#e7dcc0}
-  .frame .pimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none}
-  .frame.has-photo .pcv{display:none}
-  .frame.has-photo .pimg{display:block}
   .frame .plate{position:absolute;left:0;right:0;bottom:0;font-family:var(--mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;
     text-align:center;color:#f3ecda;background:linear-gradient(180deg,transparent,rgba(20,12,4,.62));padding:8px 2px 3px;outline:none}
   .frame .plate:focus{background:linear-gradient(180deg,transparent,rgba(20,12,4,.8))}
   .frame:not(.kportrait) .plate{display:none}
-  .frame .upl{position:absolute;top:4px;right:4px;width:26px;height:26px;border-radius:50%;border:none;background:rgba(20,12,4,.42);color:#f3ecda;
-    font-size:13px;line-height:1;opacity:.5;transition:.15s;display:grid;place-items:center;padding:0}
-  .frame:hover .upl,.frame.drag .upl{opacity:1}
   .guide{position:absolute;background:var(--life-bright);opacity:.7;z-index:5;pointer-events:none;display:none}
   .guide.v{width:1.5px;top:0;bottom:0} .guide.h{height:1.5px;left:0;right:0}
   .guide.show{display:block}
@@ -275,7 +275,19 @@
   .wall-sliders .srow{align-items:baseline}
   .wall-sliders .srow .ends{color:var(--ink-faint);text-transform:none;letter-spacing:0;font-size:9px}
   .wall-sliders .srow .snm{color:var(--ink)}
-  .item-controls,.deco-controls{border-top:1px dashed var(--line-strong);padding-top:12px}
+  .controls.actions-row{padding-bottom:4px}
+  .controls.share-row{padding-top:4px;padding-bottom:10px}
+  .share-big{width:100%;max-width:460px;padding:13px 16px;border-radius:9px;border:1.5px solid var(--gold);
+    background:color-mix(in srgb,var(--gold) 14%,transparent);color:var(--gold);
+    font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;transition:.16s}
+  .share-big:hover{background:var(--gold);color:#fff;transform:translateY(-1px)}
+  :root[data-theme="dark"] .share-big:hover{color:#14130e}
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .share-big:hover{color:#14130e}}
+  .ctrl.variant{border-color:var(--life);color:var(--life)}
+  .ctrl.variant:hover{background:var(--life-glow)}
+  .controls.compact{gap:6px;padding:8px 14px}
+  .controls.compact .ctrl{padding:8px 11px;font-size:10px}
+  .item-controls{border-top:1px dashed var(--line-strong);padding-top:11px}
   .ctrl.item-chip.act{background:var(--life);border-color:var(--life);color:#fff}
   :root[data-theme="dark"] .ctrl.item-chip.act{color:#14130e}
   @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ctrl.item-chip.act{color:#14130e}}
@@ -368,7 +380,6 @@
         <button class="tab" data-tab="train">Train the eye</button>
         <button class="tab" data-tab="wall">Perete</button>
       </div>
-      <button class="btn" id="shareBtn">⧉ Copy link</button>
       <button class="btn" id="howBtn">How</button>
       <button class="btn" id="themeBtn">Theme</button>
     </div>
@@ -432,24 +443,31 @@
   <!-- FAMILY WALL -->
   <div class="wall" id="wallWrap">
     <section class="card wall-arena">
-      <div class="card-h"><span>Peretele familiei</span><span class="wall-tag" id="wallTag">neașezat</span></div>
+      <div class="card-h"><span>Peretele familiei</span>
+        <span style="display:inline-flex;align-items:center;gap:8px"><span class="wall-pct mono" id="wallPct">0%</span><span class="wall-tag" id="wallTag">neașezat</span></span></div>
       <div class="wall-stage-wrap"><div class="wall-stage" id="wallStage">
         <div class="console"></div>
         <div class="deco-layer" id="wallDeco"></div>
         <div class="guide v" id="guideV"></div>
         <div class="guide h" id="guideH"></div>
       </div></div>
-      <div class="controls">
+      <div class="controls actions-row">
         <button class="ctrl primary" id="autoBtn">✦ Adu la viață</button>
-        <button class="ctrl" data-preset="salon">Grup salon</button>
+        <button class="ctrl variant" id="variantBtn">↻ Altă variantă</button>
+      </div>
+      <div class="controls share-row">
+        <button class="share-big" id="shareWallBtn">⧉ Copiază linkul cu această variantă</button>
+      </div>
+      <div class="controls compact">
+        <span class="deco-lbl">Stil</span>
+        <button class="ctrl" data-preset="salon">Salon</button>
         <button class="ctrl" data-preset="grid">Grilă</button>
         <button class="ctrl" data-preset="row">Rând</button>
-        <button class="ctrl" data-preset="rowscatter">Rând organic</button>
+        <button class="ctrl" data-preset="rowscatter">Organic</button>
         <button class="ctrl" data-preset="airy">Aerisit</button>
         <button class="ctrl" data-preset="scatter">Împrăștiat</button>
       </div>
-      <div class="controls item-controls" id="itemControls"></div>
-      <div class="controls deco-controls" id="decoControls"></div>
+      <div class="controls compact item-controls" id="itemControls"></div>
       <details class="adv" id="advReglaje">
         <summary>Reglaje fine <span class="hint">— mută cursoarele</span></summary>
         <div class="wall-sliders" id="wallSliders"></div>
@@ -784,10 +802,10 @@ const CONSOLE={cx:50,top:61,halfW:23};
 const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 // every framed thing on the wall — portraits (always) + optional extras
 const ITEMS=[
- {id:"father",kind:"portrait",role:"father",name:"Tată",base:16.5,present:true},
- {id:"mother",kind:"portrait",role:"mother",name:"Mamă",base:16.5,present:true},
- {id:"girl1",kind:"portrait",role:"girl1",name:"Fată",base:16.5,present:true},
- {id:"girl2",kind:"portrait",role:"girl2",name:"Fată",base:16.5,present:true},
+ {id:"father",kind:"portrait",role:"father",name:"Andrei",base:16.5,present:true},
+ {id:"mother",kind:"portrait",role:"mother",name:"Raluca",base:16.5,present:true},
+ {id:"girl1",kind:"portrait",role:"girl1",name:"Thea",base:16.5,present:true},
+ {id:"girl2",kind:"portrait",role:"girl2",name:"Oli",base:16.5,present:true},
  {id:"art1",kind:"landscape",name:"Peisaj",base:11,present:false},
  {id:"art2",kind:"abstract",name:"Abstract",base:9.5,present:true},
  {id:"art3",kind:"photo",name:"Foto mic",base:8,present:true},
@@ -818,7 +836,6 @@ const PRESETS={
 };
 const PRESET_LABEL={salon:"Grup salon",grid:"Grilă uniformă",row:"Rând",rowscatter:"Rând organic",airy:"Aerisit",scatter:"Împrăștiat"};
 const DECOS=[
- {key:"light",name:"Lampă de tablou",pat:"Insule de lumină · 252"},
  {key:"sconce",name:"Aplice de perete",pat:"Insule de lumină · 252"},
  {key:"string",name:"Ghirlandă luminoasă",pat:"Lumină caldă"},
  {key:"plant",name:"Plante",pat:"Lucruri vii"},
@@ -827,7 +844,7 @@ const DECOS=[
 ];
 const WALL={snap:true,sel:null,photos:{},style:"cluster",seed:7,
   sliders:{tight:0.55,sym:0.62,breath:0.45,order:0.62},
-  deco:{light:false,sconce:false,string:false,plant:false,mantel:false,warm:false},last:null};
+  deco:{sconce:false,string:false,plant:false,mantel:false,warm:false},last:null};
 function presentItems(){return ITEMS.filter(i=>i.present);}
 const SKIN="#E3B892",SKIN_SH="#cf9f78";
 
@@ -858,7 +875,7 @@ const WALL_PRINCIPLES=[
   tip:(g)=>g.nItems<5?"Totul e cam de aceeași mărime. Adaugă un tablou mai mic lângă portrete — nivelurile de scară dau viață.":"Mărește varietatea de scară, ca între cele mari și cele mici să fie un salt clar, dar nu prea brusc."},
  {key:"warmth",name:"Insule de lumină și căldură",sub:"decorațiuni",bonus:true,
   def:"Insule de lumină (252), Culori calde (250) și lucruri vii: o lampă de tablou, o plantă, câteva obiecte ale tale dau peretelui căldură și îl fac să strălucească — atâta timp cât nu alunecă în dezordine.",
-  tip:(g)=>"Adaugă puțină căldură — o lampă de tablou sau o plantă ar face peretele să strălucească. Dar păstrează puține; mai mult de câteva și devine dezordine."},
+  tip:(g)=>"Adaugă puțină căldură — apasă „Adu la viață” și compoziția primește lumină și o plantă, fără dezordine."},
 ];
 const WP=Object.fromEntries(WALL_PRINCIPLES.map(p=>[p.key,p]));
 
@@ -924,7 +941,7 @@ function drawItemArt(ctx,W,H,it){
 }
 function drawAllPortraits(){
   document.querySelectorAll("#wallStage .frame").forEach((fr,i)=>{
-    const it=ITEMS[i];if(!it||!it.present||WALL.photos[it.id])return;
+    const it=ITEMS[i];if(!it||!it.present)return;
     const cv=fr.querySelector(".pcv");const ctx=fit(cv);drawItemArt(ctx,cv.width,cv.height,it);});
 }
 
@@ -959,7 +976,7 @@ function wallScore(){
   const ratio=Math.max(...Sz)/Math.min(...Sz);
   const levels=ratio<=3.4?clamp01((ratio-1.12)/1.7):Math.max(0.4,1-(ratio-3.4)/4);
   const d=WALL.deco||{};
-  let w=0;if(d.light)w+=0.34;if(d.sconce)w+=0.2;if(d.string)w+=0.2;if(d.plant)w+=0.26;if(d.mantel)w+=0.2;if(d.warm)w+=0.22;
+  let w=0;if(d.sconce)w+=0.26;if(d.string)w+=0.22;if(d.plant)w+=0.3;if(d.mantel)w+=0.24;if(d.warm)w+=0.26;
   const decoCount=Object.values(d).filter(Boolean).length;
   let warmth=Math.min(1,w);if(decoCount>3)warmth*=(1-0.12*(decoCount-3));warmth=clamp01(warmth);
   const subs={strongCenter,positive,breathing,balance,notSep,goodShape,alignment,levels,warmth};
@@ -984,11 +1001,6 @@ function renderDeco(){
     svg+=`<path d="M${P0[0]} ${P0[1]} Q${Pc[0]} ${Pc[1]} ${P2[0]} ${P2[1]}" fill="none" stroke="#6a5c3f" stroke-width="0.5"/>`;
     for(let i=1;i<14;i++){const t=i/14,x=(1-t)**2*P0[0]+2*(1-t)*t*Pc[0]+t**2*P2[0],y=(1-t)**2*P0[1]+2*(1-t)*t*Pc[1]+t**2*P2[1];
       svg+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y+1.1}" stroke="#6a5c3f" stroke-width="0.3"/><circle cx="${x}" cy="${y+1.7}" r="0.95" fill="#f6cf63"/>`;}}
-  if(d.light){const fw=Math.max(9,Math.min(30,(maxX-minX)*0.6)),fy=minY-3.4;
-    svg+=`<rect x="${cxU-0.45}" y="${fy-1.3}" width="0.9" height="1.6" fill="#7a5c28"/>`;
-    svg+=`<rect x="${cxU-fw/2}" y="${fy}" width="${fw}" height="1.5" rx="0.6" fill="#b98f3c" stroke="#7a5c28" stroke-width="0.25"/>`;
-    svg+=`<path d="M${cxU-fw/2} ${fy+1.5} L${cxU-fw/2-2} ${fy+3.4} L${cxU+fw/2+2} ${fy+3.4} L${cxU+fw/2} ${fy+1.5} Z" fill="#d8b45c" opacity="0.45"/>`;
-    glows+=glowDiv("deco-glow",cxU,cyU+2,(maxX-minX)+28,(maxY-minY)+32);}
   if(d.sconce){[minX-6.5,maxX+6.5].forEach(x=>{
     svg+=`<rect x="${x-0.4}" y="${cyU-0.5}" width="0.8" height="4.5" fill="#7a5c28"/><circle cx="${x}" cy="${cyU-1}" r="1.2" fill="#f6cf63"/>`;
     glows+=glowDiv("deco-sconce",x,cyU-1,14,14);});}
@@ -1017,22 +1029,15 @@ function buildWall(){
     const fr=document.createElement("div");
     fr.className="frame k"+it.kind+((it.kind==="mirror"||it.kind==="clock")?" round":"");
     fr.dataset.i=i;
-    fr.innerHTML=`<canvas class="pcv"></canvas><img class="pimg" hidden alt="">
-      <div class="plate" contenteditable="true" spellcheck="false">${it.name}</div>
-      <button class="upl" title="Pune o poză" aria-label="Pune o poză">⌖</button>
-      <input type="file" accept="image/*" hidden>`;
+    fr.innerHTML=`<canvas class="pcv"></canvas>
+      <div class="plate" contenteditable="true" spellcheck="false">${it.name}</div>`;
     stage.appendChild(fr);
     const plate=fr.querySelector(".plate");
     plate.addEventListener("pointerdown",e=>e.stopPropagation());
     plate.addEventListener("input",()=>{it.name=plate.textContent;updateHashDebounced();});
-    const upl=fr.querySelector(".upl"),inp=fr.querySelector("input");
-    upl.addEventListener("pointerdown",e=>e.stopPropagation());
-    upl.addEventListener("click",e=>{e.stopPropagation();inp.click();});
-    inp.addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const rd=new FileReader();
-      rd.onload=()=>{const img=fr.querySelector(".pimg");img.src=rd.result;img.hidden=false;fr.classList.add("has-photo");WALL.photos[it.id]=rd.result;};rd.readAsDataURL(f);});
     fr.addEventListener("pointerdown",e=>{if(it.present)onFrameDown(e,i,fr);});
   });
-  buildSliders();buildItemControls();buildDecoControls();buildWallPrinciples();
+  buildSliders();buildItemControls();buildWallPrinciples();
   const adv=document.getElementById("advReglaje");if(adv&&matchMedia("(min-width:900px)").matches)adv.open=true;
   applyPreset("salon");
   requestAnimationFrame(()=>{drawAllPortraits();renderDeco();scoreWall();});
@@ -1096,7 +1101,7 @@ function layoutRows(its,s){
   const rowH=rows.map(r=>Math.max(...r.map(i=>i.size))),vGap=gap;
   const totalH=rowH.reduce((a,b)=>a+b,0)+vGap*(rows.length-1);
   let y=Math.max(4,CONSOLE.top-lerp(5,12,s.breath)-totalH);
-  const rng=mulberry32(4242);
+  const rng=mulberry32(4242+((WALL.seed|0)%1000));
   rows.forEach((r,ri)=>{const rh=rowH[ri],rw=r.reduce((a,i)=>a+i.size,0)+gap*(r.length-1);
     let x=50-rw/2;const cy=y+rh/2;
     r.forEach(it=>{it.x=x+it.size/2;const slack=(rh-it.size)/2;
@@ -1162,7 +1167,7 @@ function autoCompose(){
   const pick=byStyle[chosenStyle];
   WALL.style=pick.st;WALL.seed=pick.seed;keys.forEach(k=>WALL.sliders[k]=pick.sl[k]);
   // a tasteful decoration set that adds warmth without clutter
-  const decoSets=[{light:1,plant:1,warm:1},{light:1,plant:1},{light:1,warm:1,mantel:1},{light:1,sconce:1,plant:1}];
+  const decoSets=[{plant:1,warm:1},{plant:1,warm:1,mantel:1},{sconce:1,plant:1},{string:1,plant:1,warm:1}];
   let bestDeco={...WALL.deco},bdl=-1;
   decoSets.forEach(ds=>{for(const k in WALL.deco)WALL.deco[k]=!!ds[k];const L=evalLife();if(L>bdl){bdl=L;bestDeco={...WALL.deco};}});
   for(const k in WALL.deco)WALL.deco[k]=bestDeco[k];
@@ -1199,6 +1204,7 @@ function showGuide(axis,coord){const g=document.getElementById(axis==="V"?"guide
 function scoreWall(){
   const R=wallScore();WALL.last=R;renderDeco();
   const tag=document.getElementById("wallTag");tag.textContent=R.label;tag.classList.toggle("alive",R.life>=0.72);
+  const pctEl=document.getElementById("wallPct");if(pctEl){pctEl.textContent=Math.round(R.life*100)+"%";pctEl.classList.toggle("alive",R.life>=0.72);}
   markWallPrinciples();renderWallReading();}
 function markWallPrinciples(){
   const R=WALL.last;if(!R)return;
@@ -1213,7 +1219,7 @@ function renderWallReading(){
   const tip= atHome ? "Peretele e ca acasă — centrat, echilibrat și aparținând camerei de dedesubt." : worst.tip(R.geo);
   el.classList.toggle("at-home",R.life>=0.72);
   const warmHint=(R.subs.warmth<0.28 && R.life>=0.5 && !atHome)
-    ? `<p class="reason" style="font-size:.86rem"><b>Și puțină căldură:</b> aprinde o lampă de tablou sau adaugă o plantă din rândul de decorațiuni — micile insule de lumină fac peretele să pară viu.</p>`:"";
+    ? `<p class="reason" style="font-size:.86rem"><b>Și puțină căldură:</b> apasă „Adu la viață” — compoziția primește o plantă și lumină caldă, micile insule care fac peretele viu.</p>`:"";
   let detail="";
   if(WALL.sel&&WP[WALL.sel]){const p=WP[WALL.sel];detail=`<div class="wp-detail"><div class="lbl">Principiu · ${Math.round(R.subs[p.key]*100)}%</div>
     <h4>${p.name}</h4><p>${p.def}</p><p style="color:var(--life)"><b>Acum:</b> ${p.tip(R.geo)}</p></div>`;}
@@ -1264,7 +1270,7 @@ function applyState(str){
   if(o.t==="train"){setTab("train");return true;}
   return false;
 }
-function copyLink(){updateHashNow();const url=location.href;const done=()=>toast("Link copied — share this exact combination.");
+function copyLink(){updateHashNow();const url=location.href;const done=()=>toast("Link copiat — trimite exact această variantă.");
   if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(url).then(done).catch(()=>toast(url));
   else{const t=document.createElement("textarea");t.value=url;t.style.position="fixed";t.style.opacity="0";document.body.appendChild(t);t.select();
     try{document.execCommand("copy");done();}catch(e){toast("Copy from the address bar.");}t.remove();}}
@@ -1310,7 +1316,6 @@ function toggleTheme(){const root=document.documentElement;const cur=root.getAtt
 
 /* ============ WIRING ============ */
 document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{setTab(b.dataset.tab);updateHash();});
-document.getElementById("shareBtn").onclick=copyLink;
 document.getElementById("howBtn").onclick=showHow;
 document.getElementById("themeBtn").onclick=toggleTheme;
 document.getElementById("allBtn2").onclick=applyAll;
@@ -1326,6 +1331,10 @@ document.querySelectorAll("[data-choose]").forEach(b=>b.onclick=()=>choose(+b.da
 document.querySelectorAll(".spec-choice canvas").forEach(c=>c.onclick=()=>{if(!tAnswered)choose(+c.dataset.c);});
 document.querySelectorAll("[data-preset]").forEach(b=>b.onclick=()=>applyPreset(b.dataset.preset));
 document.getElementById("autoBtn").onclick=autoCompose;
+document.getElementById("variantBtn").onclick=()=>{WALL.seed=1+Math.floor(Math.random()*99999);
+  layoutFromParams();scoreWall();updateHash();
+  toast(`Altă variantă — <b>${Math.round(WALL.last.life*100)}% viață</b>.`);};
+document.getElementById("shareWallBtn").onclick=copyLink;
 document.getElementById("snapBtn").onclick=e=>{WALL.snap=!WALL.snap;e.target.textContent="Aliniere: "+(WALL.snap?"pornit":"oprit");e.target.classList.toggle("act",WALL.snap);updateHash();};
 document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeOverlay();};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOverlay();});
