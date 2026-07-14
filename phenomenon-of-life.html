@@ -210,10 +210,13 @@
   .wall{display:none;flex-direction:column;gap:14px}
   .wall.on{display:flex}
   .wp-list{overflow:auto;padding:8px;display:flex;flex-direction:column;gap:5px;max-height:40vh}
-  .wprow{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;text-align:left;background:var(--panel-2);
+  .wprow{display:grid;grid-template-columns:1fr auto;gap:2px 8px;align-items:center;text-align:left;background:var(--panel-2);
     border:1px solid var(--line);border-radius:8px;padding:10px 11px;transition:.15s;border-left:3px solid var(--line-strong)}
   .wprow:hover{border-color:var(--life);background:var(--life-glow)}
-  .wprow.sel{box-shadow:inset 0 0 0 1px var(--life)}
+  .wprow .wpdef{display:none;grid-column:1/-1;font-size:.85rem;line-height:1.45;color:var(--ink-soft);
+    padding-top:7px;margin-top:6px;border-top:1px dashed var(--line)}
+  .wprow.open .wpdef{display:block}
+  .wprow.open{box-shadow:inset 0 0 0 1px var(--life)}
   .wprow.good{border-left-color:var(--life)} .wprow.mid{border-left-color:var(--gold)} .wprow.bad{border-left-color:var(--clay)}
   .wprow .wpn{font-size:.85rem;font-weight:600;line-height:1.08}
   .wprow .wpsub{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
@@ -845,6 +848,31 @@ const WALL={snap:true,sel:null,photos:{},style:"cluster",seed:7,
   sliders:{tight:0.55,sym:0.62,breath:0.45,order:0.62},
   deco:{sconce:false,string:false,plant:false,mantel:false,warm:false},last:null};
 function presentItems(){return ITEMS.filter(i=>i.present);}
+/* modulul de spațiere: toate golurile = 1x, 2x sau 3x acest pas */
+const MINGAP=1.4;
+function gapBase(){return lerp(5.2,2.0,WALL.sliders.tight);}
+function resolveOverlaps(its){
+  const g=gapBase();          // separă direct la modul: golurile rezultate sunt 1x pasul de bază
+  for(let t=0;t<16;t++){let moved=false;
+    for(let i=0;i<its.length;i++)for(let j=i+1;j<its.length;j++){
+      const a=its[i],b=its[j],need=(a.size+b.size)/2+g-0.05;
+      const dx=b.x-a.x,dy=b.y-a.y;
+      if(Math.abs(dx)<need&&Math.abs(dy)<need){moved=true;
+        const px=need-Math.abs(dx),py=need-Math.abs(dy);
+        if(px<py){const sh=(dx>=0?1:-1)*px/2;a.x-=sh;b.x+=sh;}
+        else{const sh=(dy>=0?1:-1)*py/2;a.y-=sh;b.y+=sh;}}}
+    if(!moved)break;}
+}
+function pushOutItem(it){const its=presentItems(),g=gapBase();
+  for(let t=0;t<24;t++){let hit=null,best=0;
+    for(const o of its){if(o===it)continue;const need=(it.size+o.size)/2+g-0.05;
+      const dx=it.x-o.x,dy=it.y-o.y;
+      if(Math.abs(dx)<need&&Math.abs(dy)<need){const px=need-Math.abs(dx),py=need-Math.abs(dy);
+        const pen=Math.min(px,py);if(pen>best){best=pen;hit={dx,dy,px,py};}}}
+    if(!hit)break;
+    if(hit.px<hit.py)it.x+=(hit.dx>=0||hit.dx===0?1:-1)*hit.px;else it.y+=(hit.dy>=0?1:-1)*hit.py;
+    const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);}
+}
 const SKIN="#E3B892",SKIN_SH="#cf9f78";
 
 const WALL_PRINCIPLES=[
@@ -852,7 +880,7 @@ const WALL_PRINCIPLES=[
   def:"Cele patru tablouri ar trebui să se citească drept un singur grup, cu un centru de greutate clar — nu ca niște insule răzlețe, fără legătură între ele.",
   tip:(g)=>"Tablourile par insule separate. Apropie-le ca să formeze un singur grup, cu un centru limpede."},
  {key:"positive",name:"Spațiu pozitiv",sub:"goluri cu formă",
-  def:"Spațiile dintre rame sunt și ele forme. Păstrează-le egale și generoase, ca peretele să se citească drept figură și fond, nu ca resturi întâmplătoare.",
+  def:"Spațiile dintre rame sunt și ele forme. Păstrează-le generoase și egale — sau multipli ai aceluiași pas (1x, 2x, 3x) — ca peretele să se citească drept figură și fond, nu ca resturi întâmplătoare.",
   tip:(g)=>g.overlap?"Două rame se suprapun — desparte-le ca fiecare să respire.":"Spațiile dintre rame sunt inegale. Uniformizează-le, ca golurile să devină forme în sine."},
  {key:"breathing",name:"Golul și marginile",sub:"loc să respire",
   def:"Grupul are nevoie de aer în jur — margini față de laturile peretelui și un spațiu calm în care să se așeze. Prea înghesuit, sau pierdut într-o mare de perete, și moare.",
@@ -961,7 +989,12 @@ function wallScore(){
   const band=(v,lo,hi)=> v<lo?Math.max(0,1-(lo-v)/Math.max(lo,1)):v>hi?Math.max(0,1-(v-hi)/Math.max(hi,1)):1;
   const spread=its.reduce((a,i)=>a+Math.hypot(i.x-cx,i.y-cy),0)/N;
   const strongCenter=clamp01(1-Math.abs(spread-avgS*0.95)/(avgS*1.15));
-  const positive=overlap?0.15:band(meanGap,1.5,8)*(1-clamp01(gapStd/6));
+  // spațiu pozitiv: goluri generoase + egale sau multipli ai modulului (1x/2x/3x)
+  let modv=0;
+  if(!overlap){const g=gapBase();
+    const devs=gaps.map(gp=>{if(gp<0.5)return 1;const k=Math.max(1,Math.round(gp/g));return Math.min(1,Math.abs(gp-k*g)/(g*0.6));});
+    modv=1-devs.reduce((a,b)=>a+b,0)/devs.length;}
+  const positive=overlap?0.1:(band(meanGap,1.5,8)*(1-clamp01(gapStd/6)))*0.6+modv*0.4;
   const mL=minX,mR=WU.W-maxX,mT=minY,mB=CONSOLE.top-maxY;
   const breathing=(band(mL,6,26)+band(mR,6,26)+band(mT,4,24)+band(mB,3,14))/4;
   const totW=Sz.reduce((a,b)=>a+b,0),wx=its.reduce((a,i)=>a+i.x*i.size,0)/totW;
@@ -1048,8 +1081,12 @@ function buildWall(){
 function buildWallPrinciples(){
   const el=document.getElementById("wpList");el.innerHTML="";
   WALL_PRINCIPLES.forEach(p=>{const b=document.createElement("button");b.className="wprow";b.dataset.key=p.key;
-    b.innerHTML=`<span><span class="wpn">${p.name}</span><br><span class="wpsub">${p.sub}</span></span><span class="wsc">—</span>`;
-    b.onclick=()=>{WALL.sel=p.key;renderWallReading();markWallPrinciples();};el.appendChild(b);});
+    b.innerHTML=`<span><span class="wpn">${p.name}</span><br><span class="wpsub">${p.sub}</span></span><span class="wsc">—</span>
+      <div class="wpdef">${p.def}</div>`;
+    b.onclick=()=>{const was=b.classList.contains("open");
+      document.querySelectorAll(".wprow.open").forEach(o=>o.classList.remove("open"));
+      if(!was)b.classList.add("open");};
+    el.appendChild(b);});
 }
 function buildSliders(){const el=document.getElementById("wallSliders");if(!el)return;el.innerHTML="";
   SLIDERS.forEach(sl=>{const v=WALL.sliders[sl.key];const d=document.createElement("div");d.className="slider";
@@ -1088,15 +1125,20 @@ function layoutFromParams(apply){
   its.forEach(i=>{i.size=i.base;});                 // portraits matched; small pieces keep their own scale
   if(WALL.style==="rows") layoutRows(its,s);
   else layoutCluster(its,s,WALL.style,(WALL.seed>>>0)||1);
-  // human scale (după Alexander): oglinda servește fața → nivelul ochilor; ceasul se citește de departe → sus
-  const mir=its.find(i=>i.kind==="mirror");if(mir)mir.y=Math.max(mir.y,36);
-  const clk=its.find(i=>i.kind==="clock");if(clk)clk.y=Math.min(clk.y,30);
+  // human scale (după Alexander) + fără suprapuneri, în două treceri
+  const mir=its.find(i=>i.kind==="mirror"), clk=its.find(i=>i.kind==="clock");
+  for(let pass=0;pass<2;pass++){
+    if(mir)mir.y=Math.max(mir.y,36);
+    if(clk)clk.y=Math.min(clk.y,30);
+    its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
+    resolveOverlaps(its);
+  }
   its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
   if(apply!==false)layoutWall();
 }
 /* justified rows — the tidy, orderly look */
 function layoutRows(its,s){
-  const gap=lerp(5.6,1.9,s.tight), usable=WU.W-13, targetW=lerp(usable*0.78,usable*0.40,s.breath);
+  const gap=gapBase(), usable=WU.W-13, targetW=lerp(usable*0.78,usable*0.40,s.breath);
   // ceasul intră în primul rând (sus), oglinda spre final (jos, la nivelul ochilor)
   its=[...its.filter(i=>i.kind==="clock"),...its.filter(i=>i.kind!=="clock"&&i.kind!=="mirror"),...its.filter(i=>i.kind==="mirror")];
   const rows=[];let cur=[],curW=0;
@@ -1122,7 +1164,7 @@ function layoutCluster(its,s,style,seed){
   const rng=mulberry32(seed);
   const ports=its.filter(i=>i.kind==="portrait"), smalls=its.filter(i=>i.kind!=="portrait");
   const ps=ports.length?Math.max(...ports.map(p=>p.size)):16.5;
-  const pg=lerp(5,1.2,s.tight);
+  const pg=gapBase();
   let cols,rows;
   if(style==="line"){cols=Math.max(1,ports.length);rows=1;}
   else{cols=2;rows=Math.max(1,Math.ceil(ports.length/2));}
@@ -1132,17 +1174,18 @@ function layoutCluster(its,s,style,seed){
   const jamp=(1-s.order)*ps*(style==="scatter"?0.42:0.16);
   ports.forEach((it,i)=>{const r=Math.floor(i/cols),c=i%cols;
     it.x=cx-bw/2+c*stepX+(rng()*2-1)*jamp; it.y=cy-bh/2+r*stepY+(rng()*2-1)*jamp;});
-  const hx=bw/2+ps/2, hy=bh/2+ps/2, gm=lerp(2.5,7,s.breath)*spread;
-  const putAt=(it,ang,extra)=>{const c=Math.cos(ang),sn=Math.sin(ang);
+  const hx=bw/2+ps/2, hy=bh/2+ps/2, g=gapBase();
+  const putAt=(it,ang,kMod)=>{const c=Math.cos(ang),sn=Math.sin(ang);
     const edge=Math.min(hx/(Math.abs(c)+0.05), hy/(Math.abs(sn)+0.05));   // reach to block edge along this angle
-    const rad=edge+it.size*0.55+gm+extra;
+    const rad=edge+it.size/2+kMod*g;                                     // gol = multiplu exact al modulului
     it.x=cx+c*rad; it.y=cy+sn*rad;};
+  const kFor=()=>style==="scatter"?1+Math.floor(rng()*2):(s.breath>0.65?2:1);
   // scara umană: ceasul primește unghiul de sus, oglinda un unghi lateral
   const clkIt=smalls.find(i=>i.kind==="clock"), mirIt=smalls.find(i=>i.kind==="mirror");
-  if(clkIt)putAt(clkIt,-Math.PI/2+(rng()*2-1)*0.35,style==="scatter"?rng()*4:rng()*1.5);
-  if(mirIt)putAt(mirIt,(rng()<0.5?0:Math.PI)+(rng()*2-1)*0.3,style==="scatter"?rng()*4:rng()*1.5);
+  if(clkIt)putAt(clkIt,-Math.PI/2+(rng()*2-1)*0.35,1);
+  if(mirIt)putAt(mirIt,(rng()<0.5?0:Math.PI)+(rng()*2-1)*0.3,1);
   const rest=smalls.filter(i=>i!==clkIt&&i!==mirIt), n=rest.length||1, a0=Math.PI/2+(rng()*2-1)*0.8;
-  rest.forEach((it,k)=>putAt(it,a0+(k/n)*Math.PI*2+(rng()*2-1)*(style==="scatter"?0.5:0.2),(style==="scatter"?rng()*5:rng()*1.5)));
+  rest.forEach((it,k)=>putAt(it,a0+(k/n)*Math.PI*2+(rng()*2-1)*(style==="scatter"?0.5:0.2),kFor()));
   if(s.sym>0.55){const tw=its.reduce((a,i)=>a+i.size,0),wcx=its.reduce((a,i)=>a+i.x*i.size,0)/tw;its.forEach(i=>i.x+=(50-wcx)*0.7);}
   else{const wcx=its.reduce((a,i)=>a+i.x,0)/its.length;its.forEach(i=>i.x+=50-wcx);}
 }
@@ -1200,13 +1243,25 @@ function onFrameMove(e){if(!drag)return;const it=ITEMS[drag.i],half=it.size/2,u=
   if(WALL.snap){const tol=1.9,xs=[CONSOLE.cx],ys=[];
     presentItems().forEach(o=>{if(o!==it){xs.push(o.x);ys.push(o.y);}});
     for(const c of xs)if(Math.abs(nx-c)<tol){nx=c;gv=c;break;}
-    for(const c of ys)if(Math.abs(ny-c)<tol){ny=c;gh=c;break;}}
+    for(const c of ys)if(Math.abs(ny-c)<tol){ny=c;gh=c;break;}
+    // snap la modulul de spațiere: golurile prind 1x / 2x / 3x pasul de bază
+    const g=gapBase();
+    for(const o of presentItems()){if(o===it)continue;const sum=(it.size+o.size)/2;
+      if(Math.abs(ny-o.y)<sum){const gx=Math.abs(nx-o.x)-sum,sg=nx>=o.x?1:-1;
+        for(const k of[1,2,3])if(Math.abs(gx-k*g)<0.9){nx=o.x+sg*(sum+k*g);break;}}
+      if(Math.abs(nx-o.x)<sum){const gy=Math.abs(ny-o.y)-sum,sg=ny>=o.y?1:-1;
+        for(const k of[1,2])if(Math.abs(gy-k*g)<0.9){ny=o.y+sg*(sum+k*g);break;}}}}
   it.x=nx;it.y=ny;drag.fr.style.left=(nx-half)+"%";drag.fr.style.top=((ny-half)*100/WU.H)+"%";
   showGuide("V",gv);showGuide("H",gh);
   if(!drag.raf){drag.raf=true;requestAnimationFrame(()=>{if(drag)drag.raf=false;scoreWall();});}}
-function onFrameUp(e){if(!drag)return;drag.fr.classList.remove("drag");
+function onFrameUp(e){if(!drag)return;const idx=drag.i;drag.fr.classList.remove("drag");
   drag.fr.removeEventListener("pointermove",onFrameMove);drag.fr.removeEventListener("pointerup",onFrameUp);
-  showGuide("V",null);showGuide("H",null);drag=null;scoreWall();updateHash();}
+  showGuide("V",null);showGuide("H",null);drag=null;
+  // niciodată suprapuse: rama eliberată alunecă în cel mai apropiat loc liber; dacă e înghesuit, vecinii fac puțin loc
+  pushOutItem(ITEMS[idx]);
+  const its=presentItems();resolveOverlaps(its);
+  its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
+  layoutWall();scoreWall();updateHash();}
 function showGuide(axis,coord){const g=document.getElementById(axis==="V"?"guideV":"guideH");
   if(coord==null){g.classList.remove("show");return;}
   if(axis==="V")g.style.left=coord+"%";else g.style.top=(coord*100/WU.H)+"%";g.classList.add("show");}
@@ -1221,29 +1276,16 @@ function scoreWall(){
 function markWallPrinciples(){
   const R=WALL.last;if(!R)return;
   document.querySelectorAll(".wprow").forEach(b=>{const k=b.dataset.key,v=R.subs[k],band=scoreBand(v);
-    b.classList.remove("good","mid","bad","sel");b.classList.add(band);if(WALL.sel===k)b.classList.add("sel");
+    b.classList.remove("good","mid","bad");b.classList.add(band);
     b.querySelector(".wsc").textContent=Math.round(v*100);});}
 function renderWallReading(){
   const el=document.getElementById("wallReading");const R=WALL.last;if(!R){el.innerHTML=wallIntroHTML();return;}
   const lifePct=Math.round(R.life*100);
-  let worst=null,wv=2;WALL_PRINCIPLES.forEach(p=>{if(p.bonus)return;const v=R.subs[p.key];if(v<wv){wv=v;worst=p;}});
-  const atHome=R.life>=0.85;
-  let tip= atHome ? "Peretele e ca acasă — centrat, echilibrat și aparținând camerei de dedesubt." : worst.tip(R.geo);
-  if(R.geo.mirrorHigh)tip="Oglinda e prea sus — coboar-o la nivelul ochilor, ca să-și facă treaba: să reflecte chipurile (scara umană, după Alexander).";
-  else if(R.geo.clockLow)tip="Ceasul e prea jos — urcă-l, ca să se citească din toată camera.";
   el.classList.toggle("at-home",R.life>=0.72);
-  const warmHint=(R.subs.warmth<0.28 && R.life>=0.5 && !atHome)
-    ? `<p class="reason" style="font-size:.86rem"><b>Și puțină căldură:</b> apasă „Aranjează frumos” — compoziția primește o plantă și lumină caldă, micile insule care fac peretele viu.</p>`:"";
-  let detail="";
-  if(WALL.sel&&WP[WALL.sel]){const p=WP[WALL.sel];detail=`<div class="wp-detail"><div class="lbl">Principiu · ${Math.round(R.subs[p.key]*100)}%</div>
-    <h4>${p.name}</h4><p>${p.def}</p><p style="color:var(--life)"><b>Acum:</b> ${p.tip(R.geo)}</p></div>`;}
   el.innerHTML=`
     <div class="meter"><div class="mlabel"><span>Gradul de viață</span><span><span class="lifelabel ${R.life>=0.72?"alive":""}">${R.label}</span> <span class="mval">${lifePct}%</span></span></div>
       <div class="lifebar"><span style="width:${lifePct}%"></span></div></div>
-    <div class="top-tip"><span class="lbl">${atHome?"Ca acasă":"Încearcă asta"}</span>${tip}</div>
-    ${warmHint}
-    <p style="color:var(--ink-soft);font-size:.88rem;line-height:1.5">Aceștia sunt oamenii tăi — <em>Lucruri din viața ta</em> (Pattern 253). Peretele nu e decor care umple un gol; prinde viață când grupul își găsește un centru, respiră și aparține camerei. Trage portretele sau atinge un principiu ca să te concentrezi pe el.</p>
-    ${detail}`;}
+    <p style="color:var(--ink-soft);font-size:.88rem;line-height:1.5;margin-top:12px">Aceștia sunt oamenii tăi — <em>Lucruri din viața ta</em> (Pattern 253). Peretele nu e decor care umple un gol; prinde viață când grupul își găsește un centru, respiră și aparține camerei. Trage ramele sau deschide un principiu ca să-l citești.</p>`;}
 function wallIntroHTML(){return `<div class="wr-open"><p class="lead">Patru portrete — doi părinți, două fete — așteptând locul lor pe perete.</p>
   <p>Așază-le după aceleași principii care fac orice întreg să prindă viață. Un grup calm și centrat, care aparține consolei de dedesubt, va părea mai viu decât un perete de rame împrăștiate.</p></div>`;}
 
@@ -1258,6 +1300,7 @@ function encodeState(){
   else if(curTab==="wall"){o.st=WALL.style;o.sd=WALL.seed;
     o.sl=SLIDERS.map(s=>+WALL.sliders[s.key].toFixed(2));
     o.it=ITEMS.filter(i=>i.present).map(i=>i.id);
+    o.f=ITEMS.filter(i=>i.present).map(i=>[+i.x.toFixed(1),+i.y.toFixed(1)]);   // pozițiile reale — inclusiv mutările manuale
     o.n=ITEMS.filter(i=>i.present).map(i=>(i.name||"").trim().slice(0,18));
     o.s=WALL.snap?1:0;o.d=Object.keys(WALL.deco).filter(k=>WALL.deco[k]);}
   return b64urlEnc(JSON.stringify(o));
@@ -1280,7 +1323,12 @@ function applyState(str){
     if(Array.isArray(o.d))for(const k in WALL.deco)WALL.deco[k]=o.d.includes(k);
     syncSliders();syncItemControls();syncDecoControls();
     if(Array.isArray(o.n)){const pres=ITEMS.filter(i=>i.present);o.n.forEach((nm,i)=>{if(pres[i]){pres[i].name=nm;const fr=document.querySelector(`.frame[data-i="${ITEMS.indexOf(pres[i])}"]`);if(fr)fr.querySelector(".plate").textContent=nm;}});}
-    setTab("wall");requestAnimationFrame(()=>{layoutFromParams();drawAllPortraits();scoreWall();});return true;}
+    const pres=ITEMS.filter(i=>i.present);
+    const hasPos=Array.isArray(o.f)&&o.f.length===pres.length;
+    if(hasPos)pres.forEach((it,i)=>{it.size=it.base;it.x=+o.f[i][0];it.y=+o.f[i][1];});
+    setTab("wall");
+    requestAnimationFrame(()=>{if(hasPos){layoutWall();}else{layoutFromParams();}drawAllPortraits();scoreWall();});
+    return true;}
   if(o.t==="train"){setTab("train");return true;}
   return false;
 }
