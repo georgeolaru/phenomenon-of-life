@@ -220,10 +220,11 @@
   .wprow .wpsub{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
   .wprow .wsc{font-family:var(--mono);font-size:11px;font-variant-numeric:tabular-nums}
   .wprow.good .wsc{color:var(--life)} .wprow.mid .wsc{color:var(--gold)} .wprow.bad .wsc{color:var(--clay)}
-  .wall-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;padding:3px 8px;border-radius:99px;background:var(--line);color:var(--ink-soft)}
+  .wall-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 11px;border-radius:99px;
+    background:var(--line);color:var(--ink-soft);font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+  .wall-tag.low{background:color-mix(in srgb,var(--clay) 16%,transparent);color:var(--clay)}
+  .wall-tag.mid{background:color-mix(in srgb,var(--gold) 18%,transparent);color:var(--gold)}
   .wall-tag.alive{background:var(--life-glow);color:var(--life)}
-  .wall-pct{font-size:13px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}
-  .wall-pct.alive{color:var(--life)}
   .wall-stage-wrap{display:grid;place-items:center;padding:0}
   .wall-stage{position:relative;width:100%;aspect-ratio:4/3;border-radius:0;overflow:hidden;
     background:linear-gradient(178deg,color-mix(in srgb,var(--panel-2) 82%,#fff),var(--panel-2));
@@ -443,8 +444,7 @@
   <!-- FAMILY WALL -->
   <div class="wall" id="wallWrap">
     <section class="card wall-arena">
-      <div class="card-h"><span>Peretele familiei</span>
-        <span style="display:inline-flex;align-items:center;gap:8px"><span class="wall-pct mono" id="wallPct">0%</span><span class="wall-tag" id="wallTag">neașezat</span></span></div>
+      <div class="card-h"><span>Peretele familiei</span><span class="wall-tag" id="wallTag">neașezat</span></div>
       <div class="wall-stage-wrap"><div class="wall-stage" id="wallStage">
         <div class="console"></div>
         <div class="deco-layer" id="wallDeco"></div>
@@ -452,7 +452,7 @@
         <div class="guide h" id="guideH"></div>
       </div></div>
       <div class="controls actions-row">
-        <button class="ctrl primary" id="autoBtn">✦ Adu la viață</button>
+        <button class="ctrl primary" id="autoBtn">✦ Aranjează frumos</button>
         <button class="ctrl variant" id="variantBtn">↻ Altă variantă</button>
       </div>
       <div class="controls share-row">
@@ -875,7 +875,7 @@ const WALL_PRINCIPLES=[
   tip:(g)=>g.nItems<5?"Totul e cam de aceeași mărime. Adaugă un tablou mai mic lângă portrete — nivelurile de scară dau viață.":"Mărește varietatea de scară, ca între cele mari și cele mici să fie un salt clar, dar nu prea brusc."},
  {key:"warmth",name:"Insule de lumină și căldură",sub:"decorațiuni",bonus:true,
   def:"Insule de lumină (252), Culori calde (250) și lucruri vii: o lampă de tablou, o plantă, câteva obiecte ale tale dau peretelui căldură și îl fac să strălucească — atâta timp cât nu alunecă în dezordine.",
-  tip:(g)=>"Adaugă puțină căldură — apasă „Adu la viață” și compoziția primește lumină și o plantă, fără dezordine."},
+  tip:(g)=>"Adaugă puțină căldură — apasă „Aranjează frumos” și compoziția primește lumină și o plantă, fără dezordine."},
 ];
 const WP=Object.fromEntries(WALL_PRINCIPLES.map(p=>[p.key,p]));
 
@@ -980,9 +980,13 @@ function wallScore(){
   const decoCount=Object.values(d).filter(Boolean).length;
   let warmth=Math.min(1,w);if(decoCount>3)warmth*=(1-0.12*(decoCount-3));warmth=clamp01(warmth);
   const subs={strongCenter,positive,breathing,balance,notSep,goodShape,alignment,levels,warmth};
-  const life=clamp01(0.17*notSep+0.14*strongCenter+0.13*positive+0.10*balance+0.11*breathing+0.10*goodShape+0.10*alignment+0.08*levels+0.07*warmth);
+  let life=clamp01(0.17*notSep+0.14*strongCenter+0.13*positive+0.10*balance+0.11*breathing+0.10*goodShape+0.10*alignment+0.08*levels+0.07*warmth);
+  // scara umană: oglinda la nivelul ochilor, ceasul sus — încălcările costă
+  const mir=its.find(i=>i.kind==="mirror"),clk=its.find(i=>i.kind==="clock");
+  const mirrorHigh=!!mir&&mir.y<34, clockLow=!!clk&&clk.y>36;
+  if(mirrorHigh)life*=0.93; if(clockLow)life*=0.93; life=clamp01(life);
   let label="neașezat";if(life>=0.72)label="ca acasă";else if(life>=0.55)label="se adună";else if(life>=0.35)label="prinde contur";
-  const geo={overlap,cx,cy,mL,mR,mT,mB,meanGap,gapStd,aligned,spread,fill,decoCount,nItems:N,ratio};
+  const geo={overlap,cx,cy,mL,mR,mT,mB,meanGap,gapStd,aligned,spread,fill,decoCount,nItems:N,ratio,mirrorHigh,clockLow};
   return {life:clamp01(life),label,subs,geo};}
 
 function scoreBand(v){return v>=0.72?"good":v>=0.45?"mid":"bad";}
@@ -1085,12 +1089,17 @@ function layoutFromParams(apply){
   its.forEach(i=>{i.size=i.base;});                 // portraits matched; small pieces keep their own scale
   if(WALL.style==="rows") layoutRows(its,s);
   else layoutCluster(its,s,WALL.style,(WALL.seed>>>0)||1);
+  // human scale (după Alexander): oglinda servește fața → nivelul ochilor; ceasul se citește de departe → sus
+  const mir=its.find(i=>i.kind==="mirror");if(mir)mir.y=Math.max(mir.y,36);
+  const clk=its.find(i=>i.kind==="clock");if(clk)clk.y=Math.min(clk.y,30);
   its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});
   if(apply!==false)layoutWall();
 }
 /* justified rows — the tidy, orderly look */
 function layoutRows(its,s){
   const gap=lerp(5.6,1.9,s.tight), usable=WU.W-13, targetW=lerp(usable*0.78,usable*0.40,s.breath);
+  // ceasul intră în primul rând (sus), oglinda spre final (jos, la nivelul ochilor)
+  its=[...its.filter(i=>i.kind==="clock"),...its.filter(i=>i.kind!=="clock"&&i.kind!=="mirror"),...its.filter(i=>i.kind==="mirror")];
   const rows=[];let cur=[],curW=0;
   for(const it of its){const add=(cur.length?gap:0)+it.size;
     if(cur.length&&curW+add>targetW){rows.push(cur);cur=[];curW=0;}
@@ -1124,14 +1133,17 @@ function layoutCluster(its,s,style,seed){
   const jamp=(1-s.order)*ps*(style==="scatter"?0.42:0.16);
   ports.forEach((it,i)=>{const r=Math.floor(i/cols),c=i%cols;
     it.x=cx-bw/2+c*stepX+(rng()*2-1)*jamp; it.y=cy-bh/2+r*stepY+(rng()*2-1)*jamp;});
-  const hx=bw/2+ps/2, hy=bh/2+ps/2, n=smalls.length||1, a0=rng()*Math.PI*2;
-  const gm=lerp(2.5,7,s.breath)*spread;
-  smalls.forEach((it,k)=>{
-    const ang=a0+(k/n)*Math.PI*2+(rng()*2-1)*(style==="scatter"?0.5:0.2);
-    const c=Math.cos(ang), sn=Math.sin(ang);
+  const hx=bw/2+ps/2, hy=bh/2+ps/2, gm=lerp(2.5,7,s.breath)*spread;
+  const putAt=(it,ang,extra)=>{const c=Math.cos(ang),sn=Math.sin(ang);
     const edge=Math.min(hx/(Math.abs(c)+0.05), hy/(Math.abs(sn)+0.05));   // reach to block edge along this angle
-    const rad=edge+it.size*0.55+gm+(style==="scatter"?rng()*5:rng()*1.5);
-    it.x=cx+c*rad; it.y=cy+sn*rad;});
+    const rad=edge+it.size*0.55+gm+extra;
+    it.x=cx+c*rad; it.y=cy+sn*rad;};
+  // scara umană: ceasul primește unghiul de sus, oglinda un unghi lateral
+  const clkIt=smalls.find(i=>i.kind==="clock"), mirIt=smalls.find(i=>i.kind==="mirror");
+  if(clkIt)putAt(clkIt,-Math.PI/2+(rng()*2-1)*0.35,style==="scatter"?rng()*4:rng()*1.5);
+  if(mirIt)putAt(mirIt,(rng()<0.5?0:Math.PI)+(rng()*2-1)*0.3,style==="scatter"?rng()*4:rng()*1.5);
+  const rest=smalls.filter(i=>i!==clkIt&&i!==mirIt), n=rest.length||1, a0=Math.PI/2+(rng()*2-1)*0.8;
+  rest.forEach((it,k)=>putAt(it,a0+(k/n)*Math.PI*2+(rng()*2-1)*(style==="scatter"?0.5:0.2),(style==="scatter"?rng()*5:rng()*1.5)));
   if(s.sym>0.55){const tw=its.reduce((a,i)=>a+i.size,0),wcx=its.reduce((a,i)=>a+i.x*i.size,0)/tw;its.forEach(i=>i.x+=(50-wcx)*0.7);}
   else{const wcx=its.reduce((a,i)=>a+i.x,0)/its.length;its.forEach(i=>i.x+=50-wcx);}
 }
@@ -1203,8 +1215,9 @@ function showGuide(axis,coord){const g=document.getElementById(axis==="V"?"guide
 /* ---- wall reading ---- */
 function scoreWall(){
   const R=wallScore();WALL.last=R;renderDeco();
-  const tag=document.getElementById("wallTag");tag.textContent=R.label;tag.classList.toggle("alive",R.life>=0.72);
-  const pctEl=document.getElementById("wallPct");if(pctEl){pctEl.textContent=Math.round(R.life*100)+"%";pctEl.classList.toggle("alive",R.life>=0.72);}
+  const tag=document.getElementById("wallTag");
+  tag.textContent=`${R.label} · ${Math.round(R.life*100)}%`;
+  tag.className="wall-tag "+(R.life>=0.72?"alive":R.life>=0.5?"mid":"low");
   markWallPrinciples();renderWallReading();}
 function markWallPrinciples(){
   const R=WALL.last;if(!R)return;
@@ -1216,10 +1229,12 @@ function renderWallReading(){
   const lifePct=Math.round(R.life*100);
   let worst=null,wv=2;WALL_PRINCIPLES.forEach(p=>{if(p.bonus)return;const v=R.subs[p.key];if(v<wv){wv=v;worst=p;}});
   const atHome=R.life>=0.85;
-  const tip= atHome ? "Peretele e ca acasă — centrat, echilibrat și aparținând camerei de dedesubt." : worst.tip(R.geo);
+  let tip= atHome ? "Peretele e ca acasă — centrat, echilibrat și aparținând camerei de dedesubt." : worst.tip(R.geo);
+  if(R.geo.mirrorHigh)tip="Oglinda e prea sus — coboar-o la nivelul ochilor, ca să-și facă treaba: să reflecte chipurile (scara umană, după Alexander).";
+  else if(R.geo.clockLow)tip="Ceasul e prea jos — urcă-l, ca să se citească din toată camera.";
   el.classList.toggle("at-home",R.life>=0.72);
   const warmHint=(R.subs.warmth<0.28 && R.life>=0.5 && !atHome)
-    ? `<p class="reason" style="font-size:.86rem"><b>Și puțină căldură:</b> apasă „Adu la viață” — compoziția primește o plantă și lumină caldă, micile insule care fac peretele viu.</p>`:"";
+    ? `<p class="reason" style="font-size:.86rem"><b>Și puțină căldură:</b> apasă „Aranjează frumos” — compoziția primește o plantă și lumină caldă, micile insule care fac peretele viu.</p>`:"";
   let detail="";
   if(WALL.sel&&WP[WALL.sel]){const p=WP[WALL.sel];detail=`<div class="wp-detail"><div class="lbl">Principiu · ${Math.round(R.subs[p.key]*100)}%</div>
     <h4>${p.name}</h4><p>${p.def}</p><p style="color:var(--life)"><b>Acum:</b> ${p.tip(R.geo)}</p></div>`;}
@@ -1296,7 +1311,7 @@ function showHow(){const m=document.getElementById("modal");m.className="modal";
     <ol>
       <li><b>Compose life.</b> Tune the fifteen properties on a Persian carpet. Life is a <em>balance</em>, not a total — pile on ornament with no void or calm and it turns <span style="color:var(--clay)">crowded</span>.</li>
       <li><b>Train the eye.</b> Shown two carpets, choose the one with more life. Often it is the simpler one.</li>
-      <li><b>Family wall.</b> Drag four family portraits above the console. The same principles judge the arrangement — a centred, breathing cluster that belongs to the furniture beats a scattered wall. Tap a picture's ⌖ to swap in a real photo, or its label to rename.</li>
+      <li><b>Family wall.</b> Arrange the family portraits above the console. The same principles judge the arrangement — a centred, breathing cluster that belongs to the furniture beats a scattered wall. Tap „Aranjează frumos” for a bold composition, „Altă variantă” to reshuffle it, or drag any frame; tap a label to rename.</li>
     </ol>
     <p style="font-style:italic">Everything here is one idea: wholeness. It is the same in a carpet and on your own wall.</p>
     <button class="start" id="closeHow">Begin</button>`;
