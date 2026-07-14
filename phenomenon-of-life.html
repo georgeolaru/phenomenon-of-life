@@ -279,8 +279,9 @@
   .wall-sliders .srow{align-items:baseline}
   .wall-sliders .srow .ends{color:var(--ink-faint);text-transform:none;letter-spacing:0;font-size:9px}
   .wall-sliders .srow .snm{color:var(--ink)}
-  .controls.actions-row{padding-bottom:4px}
-  .controls.share-row{padding-top:4px;padding-bottom:10px}
+  .controls.actions-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 4px;justify-items:stretch}
+  .controls.actions-grid.tight-top{padding-top:4px;padding-bottom:10px}
+  .actions-grid .ctrl,.actions-grid .share-big{width:100%;max-width:none;padding:13px 6px;white-space:nowrap}
   .share-big{width:100%;max-width:460px;padding:13px 16px;border-radius:9px;border:1.5px solid var(--gold);
     background:color-mix(in srgb,var(--gold) 14%,transparent);color:var(--gold);
     font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600;transition:.16s}
@@ -455,12 +456,13 @@
         <div class="guide v" id="guideV"></div>
         <div class="guide h" id="guideH"></div>
       </div></div>
-      <div class="controls actions-row">
+      <div class="controls actions-grid">
         <button class="ctrl primary" id="autoBtn">✦ Aranjează frumos</button>
         <button class="ctrl variant" id="variantBtn">↻ Altă variantă</button>
       </div>
-      <div class="controls share-row">
-        <button class="share-big" id="shareWallBtn">⧉ Copiază linkul cu această variantă</button>
+      <div class="controls actions-grid tight-top">
+        <button class="share-big" id="shareWallBtn">⧉ Copiază linkul</button>
+        <button class="share-big" id="exportBtn">⬇ Exportă imagine</button>
       </div>
       <div class="controls compact">
         <span class="deco-lbl">Stil</span>
@@ -1090,6 +1092,84 @@ function renderConsole(){
     else{svg+=`<rect x="${x-2.3}" y="${bY2-5.2}" width="4.6" height="5.2" rx="0.3" fill="#f3ecda" stroke="#6a5030" stroke-width="0.5"/><rect x="${x-1.4}" y="${bY2-4.4}" width="2.8" height="3.4" fill="#8fa9bf"/>`;}});
   front.innerHTML=`<svg class="deco-svg-layer" viewBox="0 0 100 75">${svg}</svg>`;
 }
+
+/* ---- export imagine statică (PNG) — redesenează scena, fără UI ---- */
+function svgLayerToImg(sel,W,H){
+  const el=document.querySelector(sel+" svg");
+  if(!el||!el.innerHTML.trim())return Promise.resolve(null);
+  const src=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 75" width="${W}" height="${H}">${el.innerHTML}</svg>`;
+  return new Promise(res=>{const img=new Image();
+    const url=URL.createObjectURL(new Blob([src],{type:"image/svg+xml"}));
+    img.onload=()=>{URL.revokeObjectURL(url);res(img);};img.onerror=()=>{URL.revokeObjectURL(url);res(null);};img.src=url;});
+}
+async function buildExportCanvas(){
+  const k=16, W=100*k, H=75*k, u=v=>v*k;
+  const cnv=document.createElement("canvas");cnv.width=W;cnv.height=H;const ctx=cnv.getContext("2d");
+  const warm=WALL.showDeco&&WALL.deco.warm;
+  const bg=ctx.createLinearGradient(0,0,0,H);
+  bg.addColorStop(0,warm?"#f1e1c3":"#f2ecdc");bg.addColorStop(1,warm?"#e7d3ac":"#e7dfcc");
+  ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="rgba(44,38,32,.08)";ctx.fillRect(0,H*0.91,W,H*0.09);
+  ctx.fillStyle="rgba(44,38,32,.14)";ctx.fillRect(0,H*0.91,W,Math.max(1,k*0.12));
+  // consola
+  const cx0=W*0.27,cw=W*0.46,cy0=H*0.83,ch=H*0.15;
+  ctx.save();ctx.shadowColor="rgba(40,25,10,.28)";ctx.shadowBlur=u(1.2);ctx.shadowOffsetY=u(0.7);
+  const cg=ctx.createLinearGradient(0,cy0,0,cy0+ch);cg.addColorStop(0,"#9a774d");cg.addColorStop(1,"#6f5232");
+  ctx.fillStyle=cg;ctx.beginPath();roundRect(ctx,cx0,cy0,cw,ch,u(0.5));ctx.fill();ctx.restore();
+  ctx.fillStyle="rgba(0,0,0,.22)";ctx.fillRect(cx0+cw*0.08,cy0+ch*0.26,cw*0.84,Math.max(1,k*0.12));
+  // stratul din spate (aplice, ghirlandă) + luminile lor
+  const back=await svgLayerToImg("#wallDeco",W,H);if(back)ctx.drawImage(back,0,0);
+  if(WALL.showDeco&&WALL.deco.sconce&&WALL.last){
+    const its=presentItems();
+    const minX=Math.min(...its.map(i=>i.x-i.size/2)),maxX=Math.max(...its.map(i=>i.x+i.size/2));
+    const minY=Math.min(...its.map(i=>i.y-i.size/2)),maxY=Math.max(...its.map(i=>i.y+i.size/2));
+    [[minX-6.5,(minY+maxY)/2-1],[maxX+6.5,(minY+maxY)/2-1]].forEach(([gx,gy])=>{
+      const g=ctx.createRadialGradient(u(gx),u(gy),0,u(gx),u(gy),u(7));
+      g.addColorStop(0,"rgba(255,206,120,.55)");g.addColorStop(1,"rgba(255,206,120,0)");
+      ctx.fillStyle=g;ctx.fillRect(u(gx-7),u(gy-7),u(14),u(14));});
+  }
+  // ramele + arta + numele
+  for(const it of presentItems()){
+    const s=it.size,h=s/2,bw=Math.max(0.55,0.9*(s/17)+0.3);
+    const x=u(it.x-h),y=u(it.y-h),sp=u(s);
+    const border=it.kind==="mirror"?"#9a7a34":(it.kind==="clock"?"#3d342a":"#6a5030");
+    const art=document.createElement("canvas");art.width=Math.round(sp);art.height=Math.round(sp);
+    drawItemArt(art.getContext("2d"),art.width,art.height,it);
+    ctx.save();ctx.shadowColor="rgba(30,20,8,.28)";ctx.shadowBlur=u(1);ctx.shadowOffsetY=u(0.45);
+    if(it.kind==="mirror"||it.kind==="clock"){
+      ctx.beginPath();ctx.arc(x+sp/2,y+sp/2,sp/2,0,Math.PI*2);ctx.fillStyle=border;ctx.fill();ctx.restore();
+      ctx.save();ctx.beginPath();ctx.arc(x+sp/2,y+sp/2,sp/2-u(bw),0,Math.PI*2);ctx.clip();
+      ctx.drawImage(art,x,y,sp,sp);ctx.restore();
+    }else{
+      ctx.fillStyle=border;ctx.fillRect(x,y,sp,sp);ctx.restore();
+      ctx.drawImage(art,x+u(bw),y+u(bw),sp-2*u(bw),sp-2*u(bw));
+      if(it.kind==="portrait"){
+        const ph=sp*0.24,py=y+sp-u(bw)-ph;
+        const pg=ctx.createLinearGradient(0,py,0,py+ph);pg.addColorStop(0,"rgba(20,12,4,0)");pg.addColorStop(1,"rgba(20,12,4,.62)");
+        ctx.fillStyle=pg;ctx.fillRect(x+u(bw),py,sp-2*u(bw),ph);
+        ctx.fillStyle="#f3ecda";ctx.font=`600 ${Math.round(k*1.3)}px ui-monospace,Menlo,monospace`;
+        ctx.textAlign="center";ctx.textBaseline="alphabetic";
+        ctx.fillText((it.name||"").toUpperCase(),x+sp/2,y+sp-u(bw)-k*0.5);
+      }
+    }
+  }
+  // stratul din față (planta + obiectele de pe comodă)
+  const front=await svgLayerToImg("#wallFront",W,H);if(front)ctx.drawImage(front,0,0);
+  return cnv;
+}
+async function exportImage(){
+  toast("Pregătesc imaginea…");
+  try{
+    const cnv=await buildExportCanvas();
+    cnv.toBlob(blob=>{
+      if(!blob){toast("Nu am putut genera imaginea.");return;}
+      const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+      a.download="peretele-familiei.png";document.body.appendChild(a);a.click();
+      setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},4000);
+      toast("Imagine salvată — <b>peretele-familiei.png</b>");
+    },"image/png");
+  }catch(err){toast("Nu am putut genera imaginea.");}
+}
 function buildDecoControls(){const el=document.getElementById("decoControls");if(!el)return;
   el.innerHTML='<span class="deco-lbl">Decorațiuni</span>';
   DECOS.forEach(dc=>{const b=document.createElement("button");b.className="ctrl deco-chip"+(WALL.deco[dc.key]?" act":"");
@@ -1450,6 +1530,7 @@ document.getElementById("variantBtn").onclick=()=>{WALL.seed=1+Math.floor(Math.r
   layoutFromParams();scoreWall();updateHash();
   toast(`Altă variantă — <b>${Math.round(WALL.last.life*100)}% viață</b>.`);};
 document.getElementById("shareWallBtn").onclick=copyLink;
+document.getElementById("exportBtn").onclick=exportImage;
 document.getElementById("snapBtn").onclick=e=>{WALL.snap=!WALL.snap;e.target.textContent="Aliniere: "+(WALL.snap?"pornit":"oprit");e.target.classList.toggle("act",WALL.snap);updateHash();};
 document.getElementById("overlay").onclick=e=>{if(e.target.id==="overlay")closeOverlay();};
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeOverlay();});
