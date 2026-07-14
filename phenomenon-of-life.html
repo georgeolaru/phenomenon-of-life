@@ -844,7 +844,7 @@ const DECOS=[
  {key:"string",name:"Ghirlandă luminoasă",pat:"Lumină caldă"},
  {key:"warm",name:"Pereți calzi",pat:"Culori calde · 250"},
 ];
-const WALL={snap:true,sel:null,photos:{},style:"cluster",seed:7,
+const WALL={snap:true,sel:null,photos:{},style:"cluster",seed:7,showDeco:true,
   sliders:{tight:0.55,sym:0.62,breath:0.45,order:0.62},
   deco:{sconce:false,string:false,warm:false},last:null};
 /* comoda: planta e fixă (mereu acolo, în fața tablourilor); restul obiectelor
@@ -858,6 +858,7 @@ function consoleSpec(){
   return {n, objs:shapes.map((sh,i)=>({sh,x:slots[i]+(rng()*2-1)*1.6}))};
 }
 function wallObstacles(){
+  if(!WALL.showDeco)return [];                                    // fără decorațiuni, peretele e liber
   const obs=[{x0:26.5,x1:39.5,y0:43.5,y1:CONSOLE.top}];          // planta, fixă
   consoleSpec().objs.forEach(o=>obs.push({x0:o.x-4,x1:o.x+4,y0:CONSOLE.top-7.5,y1:CONSOLE.top}));
   return obs;
@@ -1038,7 +1039,7 @@ function wallScore(){
   let w=0.3+consoleSpec().n*0.08;
   if(d.sconce)w+=0.24;if(d.string)w+=0.2;if(d.warm)w+=0.24;
   const decoCount=Object.values(d).filter(Boolean).length;
-  let warmth=clamp01(w);
+  let warmth=WALL.showDeco?clamp01(w):0;
   const subs={strongCenter,positive,breathing,balance,notSep,goodShape,alignment,levels,warmth};
   let life=clamp01(0.17*notSep+0.14*strongCenter+0.13*positive+0.10*balance+0.11*breathing+0.10*goodShape+0.10*alignment+0.08*levels+0.07*warmth);
   // scara umană: oglinda la nivelul ochilor, ceasul sus — încălcările costă
@@ -1055,7 +1056,9 @@ function scoreBand(v){return v>=0.72?"good":v>=0.45?"mid":"bad";}
 function glowDiv(cls,ux,uy,wU,hU){return `<div class="deco ${cls}" style="left:${(ux-wU/2)}%;top:${(uy-hU/2)*100/WU.H}%;width:${wU}%;height:${hU*100/WU.H}%"></div>`;}
 function renderDeco(){
   const layer=document.getElementById("wallDeco");if(!layer)return;
-  const st=document.getElementById("wallStage");st.classList.toggle("warm",!!WALL.deco.warm);
+  const st=document.getElementById("wallStage");
+  if(!WALL.showDeco){st.classList.remove("warm");layer.innerHTML="";const fr=document.getElementById("wallFront");if(fr)fr.innerHTML="";return;}
+  st.classList.toggle("warm",!!WALL.deco.warm);
   const d=WALL.deco,its=presentItems();
   const minX=Math.min(...its.map(i=>i.x-i.size/2)),maxX=Math.max(...its.map(i=>i.x+i.size/2));
   const minY=Math.min(...its.map(i=>i.y-i.size/2)),maxY=Math.max(...its.map(i=>i.y+i.size/2));
@@ -1141,6 +1144,14 @@ function buildItemControls(){const el=document.getElementById("itemControls");if
       layoutFromParams();drawAllPortraits();scoreWall();updateHash();
       toast(it.present?`Adăugat: ${ei.name.replace("+ ","")}`:`Eliminat: ${ei.name.replace("+ ","")}`);};
     el.appendChild(b);});
+  const dt=document.createElement("button");dt.className="ctrl item-chip"+(WALL.showDeco?" act":"");dt.id="decoToggle";dt.textContent="Decorațiuni";
+  dt.onclick=()=>{WALL.showDeco=!WALL.showDeco;dt.classList.toggle("act",WALL.showDeco);
+    const its=presentItems();
+    if(WALL.showDeco){resolveObstacles(its);resolveOverlaps(its);
+      its.forEach(it=>{const h=it.size/2;it.x=clamp(it.x,h+1.5,WU.W-h-1.5);it.y=clamp(it.y,h+1.5,CONSOLE.top-h-1);});}
+    layoutWall();scoreWall();updateHash();
+    toast(WALL.showDeco?"Decorațiuni afișate — plantă, obiecte și lumină caldă.":"Decorațiuni ascunse — doar ramele pe perete.");};
+  el.appendChild(dt);
 }
 function syncItemControls(){document.querySelectorAll("[data-item]").forEach(b=>{const it=ITEMS.find(x=>x.id===b.dataset.item);b.classList.toggle("act",it.present);});}
 function layoutWall(){
@@ -1257,11 +1268,13 @@ function autoCompose(){
   const chosenStyle=(boldStyles.length?boldStyles:Object.keys(byStyle))[Math.floor(Math.random()*(boldStyles.length||Object.keys(byStyle).length))];
   const pick=byStyle[chosenStyle];
   WALL.style=pick.st;WALL.seed=pick.seed;keys.forEach(k=>WALL.sliders[k]=pick.sl[k]);
-  // a tasteful decoration set that adds warmth without clutter
-  const decoSets=[{warm:1},{sconce:1,warm:1},{string:1,warm:1},{sconce:1}];
-  let bestDeco={...WALL.deco},bdl=-1;
-  decoSets.forEach(ds=>{for(const k in WALL.deco)WALL.deco[k]=!!ds[k];const L=evalLife();if(L>bdl){bdl=L;bestDeco={...WALL.deco};}});
-  for(const k in WALL.deco)WALL.deco[k]=bestDeco[k];
+  // a tasteful decoration set that adds warmth without clutter (respect the hide toggle)
+  if(WALL.showDeco){
+    const decoSets=[{warm:1},{sconce:1,warm:1},{string:1,warm:1},{sconce:1}];
+    let bestDeco={...WALL.deco},bdl=-1;
+    decoSets.forEach(ds=>{for(const k in WALL.deco)WALL.deco[k]=!!ds[k];const L=evalLife();if(L>bdl){bdl=L;bestDeco={...WALL.deco};}});
+    for(const k in WALL.deco)WALL.deco[k]=bestDeco[k];
+  }
   syncSliders();syncDecoControls();
   layoutFromParams();drawAllPortraits();scoreWall();updateHash();
   const styleName={cluster:"grup creativ",scatter:"împrăștiat",line:"în linie",rows:"pe rânduri"}[pick.st]||"";
@@ -1340,7 +1353,7 @@ function encodeState(){
     o.it=ITEMS.filter(i=>i.present).map(i=>i.id);
     o.f=ITEMS.filter(i=>i.present).map(i=>[+i.x.toFixed(1),+i.y.toFixed(1)]);   // pozițiile reale — inclusiv mutările manuale
     o.n=ITEMS.filter(i=>i.present).map(i=>(i.name||"").trim().slice(0,18));
-    o.s=WALL.snap?1:0;o.d=Object.keys(WALL.deco).filter(k=>WALL.deco[k]);}
+    o.s=WALL.snap?1:0;o.d=Object.keys(WALL.deco).filter(k=>WALL.deco[k]);o.dv=WALL.showDeco?1:0;}
   return b64urlEnc(JSON.stringify(o));
 }
 function updateHashNow(){const h="#"+encodeState();if(location.hash!==h)history.replaceState(null,"",h);}
@@ -1359,6 +1372,8 @@ function applyState(str){
     if(Array.isArray(o.it))ITEMS.forEach(it=>{it.present=it.kind==="portrait"?true:o.it.includes(it.id);});
     if(o.s!=null){WALL.snap=!!o.s;const sb=document.getElementById("snapBtn");if(sb){sb.textContent="Aliniere: "+(WALL.snap?"pornit":"oprit");sb.classList.toggle("act",WALL.snap);}}
     if(Array.isArray(o.d))for(const k in WALL.deco)WALL.deco[k]=o.d.includes(k);
+    WALL.showDeco=o.dv!==0;
+    const dtb=document.getElementById("decoToggle");if(dtb)dtb.classList.toggle("act",WALL.showDeco);
     syncSliders();syncItemControls();syncDecoControls();
     if(Array.isArray(o.n)){const pres=ITEMS.filter(i=>i.present);o.n.forEach((nm,i)=>{if(pres[i]){pres[i].name=nm;const fr=document.querySelector(`.frame[data-i="${ITEMS.indexOf(pres[i])}"]`);if(fr)fr.querySelector(".plate").textContent=nm;}});}
     const pres=ITEMS.filter(i=>i.present);
@@ -1453,7 +1468,7 @@ function init(){
   selected=1;renderMeters();markList();
   const shared=savedHash?applyState(savedHash):false;
   if(shared){ requestAnimationFrame(()=>requestAnimationFrame(updateHashNow)); }
-  else{ setTab("wall"); requestAnimationFrame(()=>{renderReader();updateHashNow();}); showHow(); }
+  else{ setTab("wall"); requestAnimationFrame(()=>{renderReader();updateHashNow();}); }
   window.addEventListener("hashchange",()=>applyState(location.hash.slice(1)));
 }
 init();
